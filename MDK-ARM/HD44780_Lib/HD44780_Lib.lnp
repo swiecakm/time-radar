@@ -1,0 +1,24 @@
+--cpu Cortex-M0
+"hd44780_lib\startup_stm32f030x8.o"
+"hd44780_lib\main.o"
+"hd44780_lib\stm32f0xx_it.o"
+"hd44780_lib\stm32f0xx_hal_msp.o"
+"hd44780_lib\stm32f0xx_hal_tim.o"
+"hd44780_lib\stm32f0xx_hal_tim_ex.o"
+"hd44780_lib\stm32f0xx_hal_rcc.o"
+"hd44780_lib\stm32f0xx_hal_rcc_ex.o"
+"hd44780_lib\stm32f0xx_hal.o"
+"hd44780_lib\stm32f0xx_hal_i2c.o"
+"hd44780_lib\stm32f0xx_hal_i2c_ex.o"
+"hd44780_lib\stm32f0xx_hal_gpio.o"
+"hd44780_lib\stm32f0xx_hal_dma.o"
+"hd44780_lib\stm32f0xx_hal_cortex.o"
+"hd44780_lib\stm32f0xx_hal_pwr.o"
+"hd44780_lib\stm32f0xx_hal_pwr_ex.o"
+"hd44780_lib\stm32f0xx_hal_flash.o"
+"hd44780_lib\stm32f0xx_hal_flash_ex.o"
+"hd44780_lib\system_stm32f0xx.o"
+--library_type=microlib --strict --scatter "HD44780_Lib\HD44780_Lib.sct"
+--summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list "HD44780_Lib.map" -o HD44780_Lib\HD44780_Lib.axf
