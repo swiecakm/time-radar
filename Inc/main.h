@@ -78,16 +78,24 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define HD44780_D4_Pin GPIO_PIN_0
-#define HD44780_D4_GPIO_Port GPIOC
-#define HD44780_D5_Pin GPIO_PIN_1
-#define HD44780_D5_GPIO_Port GPIOC
-#define HD44780_D6_Pin GPIO_PIN_2
-#define HD44780_D6_GPIO_Port GPIOC
-#define HD44780_D7_Pin GPIO_PIN_3
-#define HD44780_D7_GPIO_Port GPIOC
+#define HD44780_D0_Pin GPIO_PIN_0
+#define HD44780_D0_GPIO_Port GPIOC
+#define HD44780_D1_Pin GPIO_PIN_1
+#define HD44780_D1_GPIO_Port GPIOC
+#define HD44780_D2_Pin GPIO_PIN_2
+#define HD44780_D2_GPIO_Port GPIOC
+#define HD44780_D3_Pin GPIO_PIN_3
+#define HD44780_D3_GPIO_Port GPIOC
 #define B1_Pin GPIO_PIN_0
 #define B1_GPIO_Port GPIOA
+#define HD44780_D4_Pin GPIO_PIN_4
+#define HD44780_D4_GPIO_Port GPIOC
+#define HD44780_D5_Pin GPIO_PIN_5
+#define HD44780_D5_GPIO_Port GPIOC
+#define HD44780_D6_Pin GPIO_PIN_6
+#define HD44780_D6_GPIO_Port GPIOC
+#define HD44780_D7_Pin GPIO_PIN_7
+#define HD44780_D7_GPIO_Port GPIOC
 #define HD44780_RS_Pin GPIO_PIN_8
 #define HD44780_RS_GPIO_Port GPIOC
 #define HD44780_E_Pin GPIO_PIN_9

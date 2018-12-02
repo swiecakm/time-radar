@@ -54,6 +54,15 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 
+//Initial commands
+#define HD44780_COMMAND_CLEAR 1
+#define HD44780_COMMAND_RETURN_HOME 2
+#define HD44780_COMMAND_INCR_DDRAM_AND_NO_SHIFT 6
+#define HD44780_COMMAND_DISPLAY_ON_CURSOR_OFF_BLINK_OFF 12
+#define HD44780_COMMAND_DISPLAY_MOVE_DISPLAY 16
+#define HD44780_COMMAND_8BIT_TWO_LINES_5x8 56
+
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -71,8 +80,24 @@
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
-void Send4bitsOfData(int, int, int, int);
+void HD44780_Initialize(void);
+void Send_Data_To_HD44780(int);
 
+const int delayBetweenCommans = 1;
+
+uint16_t HD44780_OUTPINS[8] = {
+	HD44780_D0_Pin,
+	HD44780_D1_Pin,
+	HD44780_D2_Pin,
+	HD44780_D3_Pin,
+	HD44780_D4_Pin,
+	HD44780_D5_Pin,
+	HD44780_D6_Pin,
+	HD44780_D7_Pin
+};
+
+char message[] = "Hello my friend!";
+	
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -109,36 +134,15 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-	HAL_GPIO_WritePin(GPIOC, HD44780_RS_Pin, GPIO_PIN_RESET);
+	HD44780_Initialize();
 	
-	Send4bitsOfData(0, 0, 1, 0);
-	HAL_Delay(1000);
+	for(int i=0; i<sizeof(message)-1; i++) {
+	  Send_Data_To_HD44780(message[i]);
+		HAL_Delay(delayBetweenCommans);
+	}
 	
-	Send4bitsOfData(0, 0, 1, 0);
-	Send4bitsOfData(0, 0, 1, 0);
-	HAL_Delay(1000);
-	
-	Send4bitsOfData(0, 0, 1, 0);
-	Send4bitsOfData(0, 0, 1, 0);
-	HAL_Delay(1000);
-	
-	Send4bitsOfData(0, 0, 0, 0);
-	Send4bitsOfData(1, 1, 1, 0);
-	HAL_Delay(1000);
-	
-	Send4bitsOfData(0, 0, 0, 0);
-	Send4bitsOfData(0, 1, 1, 0);
-	HAL_Delay(1000);
-	
-	HAL_GPIO_WritePin(GPIOC, HD44780_RS_Pin, GPIO_PIN_SET);
-	
-	Send4bitsOfData(0, 1, 0, 0);
-	Send4bitsOfData(1, 0, 0, 0);
-	HAL_Delay(1000);
-	
-	Send4bitsOfData(0, 1, 0, 0);
-	Send4bitsOfData(1, 0, 0, 0);
-	HAL_Delay(1000);
+	/*Send_Data_To_HD44780(72);
+	HAL_Delay(100);*/
 	
   /* USER CODE END 2 */
 
@@ -204,12 +208,15 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOC, HD44780_D4_Pin|HD44780_D5_Pin|HD44780_D6_Pin|HD44780_D7_Pin 
+  HAL_GPIO_WritePin(GPIOC, HD44780_D0_Pin|HD44780_D1_Pin|HD44780_D2_Pin|HD44780_D3_Pin 
+                          |HD44780_D4_Pin|HD44780_D5_Pin|HD44780_D6_Pin|HD44780_D7_Pin 
                           |HD44780_RS_Pin|HD44780_E_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : HD44780_D4_Pin HD44780_D5_Pin HD44780_D6_Pin HD44780_D7_Pin 
+  /*Configure GPIO pins : HD44780_D0_Pin HD44780_D1_Pin HD44780_D2_Pin HD44780_D3_Pin 
+                           HD44780_D4_Pin HD44780_D5_Pin HD44780_D6_Pin HD44780_D7_Pin 
                            HD44780_RS_Pin HD44780_E_Pin */
-  GPIO_InitStruct.Pin = HD44780_D4_Pin|HD44780_D5_Pin|HD44780_D6_Pin|HD44780_D7_Pin 
+  GPIO_InitStruct.Pin = HD44780_D0_Pin|HD44780_D1_Pin|HD44780_D2_Pin|HD44780_D3_Pin 
+                          |HD44780_D4_Pin|HD44780_D5_Pin|HD44780_D6_Pin|HD44780_D7_Pin 
                           |HD44780_RS_Pin|HD44780_E_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -226,16 +233,41 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-void Send4bitsOfData(int bit1, int bit2, int bit3, int bit4)
+void HD44780_Initialize(void)
+{
+	HAL_GPIO_WritePin(GPIOC, HD44780_RS_Pin, GPIO_PIN_RESET);
+	
+	Send_Data_To_HD44780(HD44780_COMMAND_CLEAR);
+	HAL_Delay(100);
+
+	Send_Data_To_HD44780(HD44780_COMMAND_RETURN_HOME);
+	HAL_Delay(100);
+	
+	Send_Data_To_HD44780(HD44780_COMMAND_INCR_DDRAM_AND_NO_SHIFT);
+	HAL_Delay(100);
+	
+	Send_Data_To_HD44780(HD44780_COMMAND_DISPLAY_ON_CURSOR_OFF_BLINK_OFF);
+	HAL_Delay(100);
+	
+	Send_Data_To_HD44780(HD44780_COMMAND_8BIT_TWO_LINES_5x8);
+	HAL_Delay(100);
+	
+	HAL_GPIO_WritePin(GPIOC, HD44780_RS_Pin, GPIO_PIN_SET);
+	HAL_Delay(100);
+}
+
+void Send_Data_To_HD44780(int data)
 {
 	HAL_GPIO_WritePin(GPIOC, HD44780_E_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOC, HD44780_D4_Pin, bit1);
-	HAL_GPIO_WritePin(GPIOC, HD44780_D5_Pin, bit2);
-	HAL_GPIO_WritePin(GPIOC, HD44780_D6_Pin, bit3);
-	HAL_GPIO_WritePin(GPIOC, HD44780_D7_Pin, bit4);
-	HAL_Delay(10);
+	HAL_Delay(delayBetweenCommans);
+	for (int i=0; i<8; i++) 
+	{
+		int value = (1 & (data >> i));
+		HAL_GPIO_WritePin(GPIOC, HD44780_OUTPINS[i], value);
+	}
+	HAL_Delay(delayBetweenCommans);
 	HAL_GPIO_WritePin(GPIOC, HD44780_E_Pin, GPIO_PIN_RESET);
-	HAL_Delay(10);
+	HAL_Delay(delayBetweenCommans);
 }
 
 /* USER CODE END 4 */
