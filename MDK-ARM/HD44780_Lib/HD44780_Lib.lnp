@@ -3,6 +3,7 @@
 "hd44780_lib\main.o"
 "hd44780_lib\stm32f0xx_it.o"
 "hd44780_lib\stm32f0xx_hal_msp.o"
+"hd44780_lib\stm32f0xx_hd44780.o"
 "hd44780_lib\stm32f0xx_hal_tim.o"
 "hd44780_lib\stm32f0xx_hal_tim_ex.o"
 "hd44780_lib\stm32f0xx_hal_rcc.o"
