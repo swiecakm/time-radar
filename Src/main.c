@@ -115,7 +115,6 @@ int main(void)
 	
 	for(int i=0; i<sizeof(message)-1; i++) {
 	  HD44780_SendCommand(message[i]);
-		HAL_Delay(HD44780_COMMAND_DELAY);
 	}
 	
 	/*HD44780_SendCommand(72);
