@@ -3,4 +3,6 @@
 void HD44780_Initialize(void);
 	
 void HD44780_SendCommand(int);
+
+void InitializeTimer(void);
 #endif
