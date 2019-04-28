@@ -20,7 +20,7 @@ uint16_t HD44780_OUTPINS[8] = {
 	HD44780_D7_Pin
 };
 
-const int HD44780_COMMAND_DELAY = 1;
+const int HD44780_COMMAND_DELAY = 100;
 
 void HD44780_Initialize(void)
 {
@@ -42,19 +42,28 @@ void HD44780_Initialize(void)
 	HAL_Delay(HD44780_COMMAND_DELAY);
 	
 	HAL_GPIO_WritePin(GPIOC, HD44780_RS_Pin, GPIO_PIN_SET);
-	HAL_Delay(HD44780_COMMAND_DELAY);
+	HAL_Delay(HD44780_COMMAND_DELAY); 
 }
 
 void HD44780_SendCommand(int data)
 {
 	HAL_GPIO_WritePin(GPIOC, HD44780_E_Pin, GPIO_PIN_SET);
-	HAL_Delay(HD44780_COMMAND_DELAY);
+	//HAL_Delay(HD44780_COMMAND_DELAY);
+	for (int i=0; i<1000; i++) 
+	{
+	}
 	for (int i=0; i<8; i++) 
 	{
 		int value = (1 & (data >> i));
 		HAL_GPIO_WritePin(GPIOC, HD44780_OUTPINS[i], value);
 	}
-	HAL_Delay(HD44780_COMMAND_DELAY);
+	//HAL_Delay(HD44780_COMMAND_DELAY);
+		for (int i=0; i<1000; i++) 
+	{
+	}
 	HAL_GPIO_WritePin(GPIOC, HD44780_E_Pin, GPIO_PIN_RESET);
-	HAL_Delay(HD44780_COMMAND_DELAY);
+	//HAL_Delay(HD44780_COMMAND_DELAY);
+		for (int i=0; i<1000; i++) 
+	{
+	}
 }

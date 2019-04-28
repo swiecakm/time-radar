@@ -41,6 +41,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f0xx_hd44780.h"
+#include "..\Drivers/STM32F0xx_HAL_Driver\Inc\stm32f0xx_hal_tim.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -72,8 +73,16 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+void InitializeTimer(void);
 /* USER CODE BEGIN PFP */
-char message[] = "Elo!";
+char message[] = "Hello";
+
+TIM_HandleTypeDef TIM_HandleInitStruct;
+
+void TIM16_IRQHandler(void)
+{
+ HAL_TIM_IRQHandler(&TIM_HandleInitStruct);
+}
 	
 /* USER CODE END PFP */
 
@@ -113,9 +122,19 @@ int main(void)
   /* USER CODE BEGIN 2 */
 	HD44780_Initialize();
 	
+	
+	
 	for(int i=0; i<sizeof(message)-1; i++) {
 	  HD44780_SendCommand(message[i]);
 	}
+
+	HAL_Delay(100);
+	InitializeTimer();
+	HAL_TIM_Base_Start_IT(&TIM_HandleInitStruct);
+	for(int i=0; i<sizeof(message)-1; i++) {
+	  HD44780_SendCommand(message[i]);
+	}
+	
 	
 	/*HD44780_SendCommand(72);
 	HAL_Delay(100);*/
@@ -133,6 +152,34 @@ int main(void)
   }
   /* USER CODE END 3 */
 }
+
+void InitializeTimer(void)
+{
+	__HAL_RCC_TIM16_CLK_ENABLE();
+	
+	
+	TIM_HandleInitStruct.Instance = TIM16;
+	TIM_HandleInitStruct.Init.Prescaler = 48000 - 1;
+	TIM_HandleInitStruct.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+	TIM_HandleInitStruct.Init.CounterMode = TIM_COUNTERMODE_UP;
+	TIM_HandleInitStruct.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+	TIM_HandleInitStruct.Init.Period = 10000 - 1;
+	
+	HAL_TIM_Base_Init(&TIM_HandleInitStruct);
+	__HAL_TIM_CLEAR_FLAG(&TIM_HandleInitStruct, TIM_SR_UIF);
+	
+	HAL_NVIC_EnableIRQ(TIM16_IRQn);
+	//__HAL_TIM_ENABLE_IT(&TIM_HandleInitStruct, TIM_IT_UPDATE);
+	//HAL_TIM_Base_Start_IT(&TIM_HandleInitStruct);
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	for(int i=sizeof(message)-1; i>=0; i--) {
+	  HD44780_SendCommand(message[i]);
+	}
+}
+
 
 /**
   * @brief System Clock Configuration
@@ -204,7 +251,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
-
 }
 
 /* USER CODE BEGIN 4 */
