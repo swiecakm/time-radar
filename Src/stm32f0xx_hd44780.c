@@ -135,7 +135,6 @@ void HD44780_InitializeTimer(void)
 {
 	__HAL_RCC_TIM16_CLK_ENABLE();
 	
-	
 	TIM_HandleInitStruct.Instance = TIM16;
 	TIM_HandleInitStruct.Init.Prescaler = 48000 - 1;
 	TIM_HandleInitStruct.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
