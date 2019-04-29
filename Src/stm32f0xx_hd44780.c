@@ -17,7 +17,7 @@ int8_t commands_buff[BUFF_SIZE];
 int8_t *head = &commands_buff[0];
 int8_t *tail = &commands_buff[0];
 
-void PutOnBuffer(int value)
+void HD44780_PutOnBuffer(int value)
 {
 	*head = value;
 	if(head < &commands_buff[0] + BUFF_SIZE) 
@@ -30,7 +30,7 @@ void PutOnBuffer(int value)
 	}
 }
 
-int GetFromBuffer(void)
+int HD44780_GetFromBuffer(void)
 {
 	int value = *tail;
 	if(tail < &commands_buff[0] + BUFF_SIZE) 
@@ -87,10 +87,10 @@ void HD44780_Initialize(void)
 	HAL_Delay(HD44780_COMMAND_DELAY);
 	
 	for(int i=0; i<sizeof(message); i++) {
-	  PutOnBuffer(message[i]);
+	  HD44780_PutOnBuffer(message[i]);
 	}
 	
-	InitializeTimer();
+	HD44780_InitializeTimer();
 }
 
 void HD44780_SendCommand(int data)
@@ -122,13 +122,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	{
 		while(tail < head)
 		{
-			int value = GetFromBuffer();
+			int value = HD44780_GetFromBuffer();
 			HD44780_SendCommand(value);
 		}
 	}
 }
 
-void InitializeTimer(void)
+void HD44780_InitializeTimer(void)
 {
 	__HAL_RCC_TIM16_CLK_ENABLE();
 	

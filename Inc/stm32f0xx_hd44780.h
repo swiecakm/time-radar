@@ -4,9 +4,9 @@ void HD44780_Initialize(void);
 	
 void HD44780_SendCommand(int);
 
-void InitializeTimer(void);
+void HD44780_InitializeTimer(void);
 
-void PutOnBuffer(int);
+void HD44780_PutOnBuffer(int);
 
-int GetFromBuffer(void);
+int HD44780_GetFromBuffer(void);
 #endif
