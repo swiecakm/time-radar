@@ -1,6 +1,7 @@
 #include "stm32f0xx_hd44780.h"
 #include "main.h"
 #include "..\Drivers/STM32F0xx_HAL_Driver\Inc\stm32f0xx_hal_tim.h"
+#include "string.h"
 
 #define BUFF_SIZE 128
 
@@ -12,7 +13,6 @@
 #define HD44780_COMMAND_DISPLAY_MOVE_DISPLAY 16
 #define HD44780_COMMAND_8BIT_TWO_LINES_5x8 56
 
-char message[] = "init 123";
 int8_t commands_buff[BUFF_SIZE];
 int8_t *head = &commands_buff[0];
 int8_t *tail = &commands_buff[0];
@@ -86,11 +86,14 @@ void HD44780_Initialize(void)
 	HAL_GPIO_WritePin(GPIOC, HD44780_RS_Pin, GPIO_PIN_SET);
 	HAL_Delay(HD44780_COMMAND_DELAY);
 	
-	for(int i=0; i<sizeof(message); i++) {
+	HD44780_InitializeTimer();
+}
+
+void HD44780_SendMessage(char message[])
+{
+	for(int i=0; i<strlen(message); i++) {
 	  HD44780_PutOnBuffer(message[i]);
 	}
-	
-	HD44780_InitializeTimer();
 }
 
 void HD44780_SendCommand(int data)

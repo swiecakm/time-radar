@@ -120,6 +120,8 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+	char message[] = "Hello World!";
+	HD44780_SendMessage(message);
   while (1)
   {
     /* USER CODE END WHILE */
