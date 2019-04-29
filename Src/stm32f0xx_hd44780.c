@@ -17,6 +17,26 @@ int8_t commands_buff[BUFF_SIZE];
 int8_t *head = &commands_buff[0];
 int8_t *tail = &commands_buff[0];
 
+uint16_t HD44780_OUTPINS[8] = {
+	HD44780_D0_Pin,
+	HD44780_D1_Pin,
+	HD44780_D2_Pin,
+	HD44780_D3_Pin,
+	HD44780_D4_Pin,
+	HD44780_D5_Pin,
+	HD44780_D6_Pin,
+	HD44780_D7_Pin
+};
+
+const int HD44780_COMMAND_DELAY = 100;
+
+TIM_HandleTypeDef TIM_HandleInitStruct;
+
+void TIM16_IRQHandler(void)
+{
+ HAL_TIM_IRQHandler(&TIM_HandleInitStruct);
+}
+
 void HD44780_PutOnBuffer(int value)
 {
 	*head = value;
@@ -42,26 +62,6 @@ int HD44780_GetFromBuffer(void)
 		tail = &commands_buff[0];
 	}
 	return value;
-}
-
-uint16_t HD44780_OUTPINS[8] = {
-	HD44780_D0_Pin,
-	HD44780_D1_Pin,
-	HD44780_D2_Pin,
-	HD44780_D3_Pin,
-	HD44780_D4_Pin,
-	HD44780_D5_Pin,
-	HD44780_D6_Pin,
-	HD44780_D7_Pin
-};
-
-const int HD44780_COMMAND_DELAY = 100;
-
-TIM_HandleTypeDef TIM_HandleInitStruct;
-
-void TIM16_IRQHandler(void)
-{
- HAL_TIM_IRQHandler(&TIM_HandleInitStruct);
 }
 
 void HD44780_Initialize(void)
@@ -100,9 +100,9 @@ void HD44780_SendCommand(int data)
 {
 	HAL_GPIO_WritePin(GPIOC, HD44780_E_Pin, GPIO_PIN_SET);
 	//HAL_Delay(HD44780_COMMAND_DELAY);
-	for (int i=0; i<1000; i++) 
+	/*for (int i=0; i<1000; i++) 
 	{
-	}
+	}*/
 	for (int i=0; i<8; i++) 
 	{
 		int value = (1 & (data >> i));
