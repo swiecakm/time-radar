@@ -119,15 +119,32 @@ void HD44780_SendCommand(int data)
 	}
 }
 
+enum BusStates 
+{
+	LOW_STATE,
+	HIGH_STATE
+};
+
+enum BusStates eState = LOW_STATE;
+
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if(tail != head)
+	if (eState == LOW_STATE && tail != head)
 	{
-		while(tail < head)
+		HAL_GPIO_WritePin(GPIOC, HD44780_E_Pin, GPIO_PIN_SET);
+		eState = HIGH_STATE;
+		int data = HD44780_GetFromBuffer();
+		for (int i=0; i<8; i++) 
 		{
-			int value = HD44780_GetFromBuffer();
-			HD44780_SendCommand(value);
+			int value = (1 & (data >> i));
+			HAL_GPIO_WritePin(GPIOC, HD44780_OUTPINS[i], value);
 		}
+	}
+	
+	if (eState == HIGH_STATE)
+	{
+		HAL_GPIO_WritePin(GPIOC, HD44780_E_Pin, GPIO_PIN_RESET);
+		eState = LOW_STATE;
 	}
 }
 
@@ -135,12 +152,13 @@ void HD44780_InitializeTimer(void)
 {
 	__HAL_RCC_TIM16_CLK_ENABLE();
 	
+	//10 ms period
 	TIM_HandleInitStruct.Instance = TIM16;
 	TIM_HandleInitStruct.Init.Prescaler = 48000 - 1;
 	TIM_HandleInitStruct.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	TIM_HandleInitStruct.Init.CounterMode = TIM_COUNTERMODE_UP;
 	TIM_HandleInitStruct.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-	TIM_HandleInitStruct.Init.Period = 2000 - 1;
+	TIM_HandleInitStruct.Init.Period = 10 - 1;
 	
 	HAL_TIM_Base_Init(&TIM_HandleInitStruct);
 	__HAL_TIM_CLEAR_FLAG(&TIM_HandleInitStruct, TIM_SR_UIF);
