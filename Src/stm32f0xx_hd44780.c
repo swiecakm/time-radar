@@ -118,9 +118,6 @@ void HD44780_SendCommand(int data)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	/*for(int i=sizeof(message)-1; i>=0; i--) {
-	  HD44780_SendCommand(message[i]);
-	}*/
 	if(tail != head)
 	{
 		while(tail < head)
@@ -148,7 +145,5 @@ void InitializeTimer(void)
 	
 	HAL_NVIC_EnableIRQ(TIM16_IRQn);
 	HAL_TIM_Base_Start_IT(&TIM_HandleInitStruct);
-	//__HAL_TIM_ENABLE_IT(&TIM_HandleInitStruct, TIM_IT_UPDATE);
-	//HAL_TIM_Base_Start_IT(&TIM_HandleInitStruct);
 }
 
