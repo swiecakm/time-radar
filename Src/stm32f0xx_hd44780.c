@@ -2,6 +2,8 @@
 #include "main.h"
 #include "..\Drivers/STM32F0xx_HAL_Driver\Inc\stm32f0xx_hal_tim.h"
 
+#define BUFF_SIZE 128
+
 //Initial commands
 #define HD44780_COMMAND_CLEAR 1
 #define HD44780_COMMAND_RETURN_HOME 2
@@ -10,7 +12,37 @@
 #define HD44780_COMMAND_DISPLAY_MOVE_DISPLAY 16
 #define HD44780_COMMAND_8BIT_TWO_LINES_5x8 56
 
-char message[] = "init ";
+char message[] = "init 123";
+int8_t commands_buff[BUFF_SIZE];
+int8_t *head = &commands_buff[0];
+int8_t *tail = &commands_buff[0];
+
+void PutOnBuffer(int value)
+{
+	*head = value;
+	if(head < &commands_buff[0] + BUFF_SIZE) 
+	{
+		head++;
+	}
+	else
+	{
+		head = &commands_buff[0];
+	}
+}
+
+int GetFromBuffer(void)
+{
+	int value = *tail;
+	if(tail < &commands_buff[0] + BUFF_SIZE) 
+	{
+		tail++;
+	}
+	else
+	{
+		tail = &commands_buff[0];
+	}
+	return value;
+}
 
 uint16_t HD44780_OUTPINS[8] = {
 	HD44780_D0_Pin,
@@ -52,7 +84,11 @@ void HD44780_Initialize(void)
 	HAL_Delay(HD44780_COMMAND_DELAY);
 	
 	HAL_GPIO_WritePin(GPIOC, HD44780_RS_Pin, GPIO_PIN_SET);
-	HAL_Delay(HD44780_COMMAND_DELAY); 
+	HAL_Delay(HD44780_COMMAND_DELAY);
+	
+	for(int i=0; i<sizeof(message); i++) {
+	  PutOnBuffer(message[i]);
+	}
 	
 	InitializeTimer();
 }
@@ -82,8 +118,16 @@ void HD44780_SendCommand(int data)
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	for(int i=sizeof(message)-1; i>=0; i--) {
+	/*for(int i=sizeof(message)-1; i>=0; i--) {
 	  HD44780_SendCommand(message[i]);
+	}*/
+	if(tail != head)
+	{
+		while(tail < head)
+		{
+			int value = GetFromBuffer();
+			HD44780_SendCommand(value);
+		}
 	}
 }
 
@@ -97,7 +141,7 @@ void InitializeTimer(void)
 	TIM_HandleInitStruct.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 	TIM_HandleInitStruct.Init.CounterMode = TIM_COUNTERMODE_UP;
 	TIM_HandleInitStruct.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-	TIM_HandleInitStruct.Init.Period = 10000 - 1;
+	TIM_HandleInitStruct.Init.Period = 2000 - 1;
 	
 	HAL_TIM_Base_Init(&TIM_HandleInitStruct);
 	__HAL_TIM_CLEAR_FLAG(&TIM_HandleInitStruct, TIM_SR_UIF);
