@@ -70,7 +70,7 @@ enum BusStates
 
 enum BusStates eState = HIGH_STATE;
 
-void HD44780_SendDataFromBufferToLCD(circular_buffer_t *buff)
+void HD44780_SetDataFromBufferOnLCDPins(circular_buffer_t *buff)
 {
 	int data = circular_buf_get(buff);	
 	for (int i=0; i<8; i++) 
@@ -80,27 +80,39 @@ void HD44780_SendDataFromBufferToLCD(circular_buffer_t *buff)
 	}
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+void HD44780_SetDataOnLCDPinsIfAvailable()
 {
-	if (eState == LOW_STATE && !circular_buf_empty(commands_buffer))
+	if (!circular_buf_empty(commands_buffer))
 	{
 		//send LCD command in priority
 		HAL_GPIO_WritePin(GPIOC, HD44780_RS_Pin, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOC, HD44780_E_Pin, GPIO_PIN_SET);
-		eState = HIGH_STATE;
-		HD44780_SendDataFromBufferToLCD(commands_buffer);
+		HD44780_SetDataFromBufferOnLCDPins(commands_buffer);
 	}
-	else if (eState == LOW_STATE && !circular_buf_empty(characters_buffer))
+	else if (!circular_buf_empty(characters_buffer))
 	{
 		//if no commands send characters
 		HAL_GPIO_WritePin(GPIOC, HD44780_RS_Pin, GPIO_PIN_SET);
 		HAL_GPIO_WritePin(GPIOC, HD44780_E_Pin, GPIO_PIN_SET);
+		HD44780_SetDataFromBufferOnLCDPins(characters_buffer);
+	}
+}
+
+void HD44780_WriteDataToLCD()
+{
+	HAL_GPIO_WritePin(GPIOC, HD44780_E_Pin, GPIO_PIN_RESET);
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if (eState == LOW_STATE)
+	{
+		HD44780_SetDataOnLCDPinsIfAvailable();
 		eState = HIGH_STATE;
-		HD44780_SendDataFromBufferToLCD(characters_buffer);
 	}
 	else if (eState == HIGH_STATE)
 	{
-		HAL_GPIO_WritePin(GPIOC, HD44780_E_Pin, GPIO_PIN_RESET);
+		HD44780_WriteDataToLCD();
 		eState = LOW_STATE;
 	}
 }
