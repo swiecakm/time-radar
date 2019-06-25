@@ -86,6 +86,9 @@ static void MX_GPIO_Init(void);
   * @brief  The application entry point.
   * @retval int
   */
+	
+char message[] = "Hello world! This is test!";
+	
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -96,7 +99,6 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
@@ -120,7 +122,6 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	char message[] = "Hello World!";
 	HD44780_SendMessage(message);
   while (1)
   {

@@ -412,6 +412,16 @@
               <FileType>1</FileType>
               <FilePath>..\Src\stm32f0xx_hd44780.c</FilePath>
             </File>
+            <File>
+              <FileName>circularbuf.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\circularbuf.h</FilePath>
+            </File>
+            <File>
+              <FileName>circularbuf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/circularbuf.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
