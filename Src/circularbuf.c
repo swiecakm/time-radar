@@ -1,23 +1,10 @@
 #include "circularbuf.h"
 #define BUFF_SIZE 127
 
-typedef struct
-{
-	int8_t *commands_buff;
-	int8_t head ;
-	int8_t tail;
-	int8_t size;
-} circular_buffer_t;
 
-circular_buffer_t* commands_buf;
 circular_buffer_t* circular_buf_initialize_new(void);
 
-void circular_buf_initialize()
-{
-	commands_buf = circular_buf_initialize_new();
-}
-
-circular_buffer_t* circular_buf_initialize_new()
+circular_buffer_t* circular_buf_initialize()
 {
 	circular_buffer_t *commands_buf = (circular_buffer_t *) malloc(sizeof(circular_buffer_t));
 	commands_buf->commands_buff = (int8_t *) malloc(sizeof(int8_t)*BUFF_SIZE);
@@ -27,7 +14,7 @@ circular_buffer_t* circular_buf_initialize_new()
 	return commands_buf;
 }
 
-void circular_buf_put(int8_t value)
+void circular_buf_put(circular_buffer_t* commands_buf, int8_t value)
 {
 	commands_buf->commands_buff[commands_buf->head] = value;
 	if(commands_buf->head < commands_buf->size) 
@@ -40,7 +27,7 @@ void circular_buf_put(int8_t value)
 	}
 }
 
-int circular_buf_get(void)
+int circular_buf_get(circular_buffer_t* commands_buf)
 {
 	int value = commands_buf->commands_buff[commands_buf->tail];
 	if(commands_buf->tail < commands_buf->size) 
@@ -54,7 +41,7 @@ int circular_buf_get(void)
 	return value;
 }
 
-int circular_buf_empty(void)
+int circular_buf_empty(circular_buffer_t* commands_buf)
 {
 	return commands_buf->head == commands_buf->tail;
 }

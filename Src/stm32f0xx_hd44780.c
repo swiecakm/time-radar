@@ -29,6 +29,8 @@ uint16_t HD44780_OUTPINS[8] = {
 
 const int HD44780_COMMAND_DELAY = 100;
 
+circular_buffer_t *commands_buffer;
+
 TIM_HandleTypeDef TIM_HandleInitStruct;
 
 void TIM16_IRQHandler(void)
@@ -38,7 +40,7 @@ void TIM16_IRQHandler(void)
 
 void HD44780_Initialize(void)
 {
-	circular_buf_initialize();
+	commands_buffer = circular_buf_initialize();
 	HAL_GPIO_WritePin(GPIOC, HD44780_RS_Pin, GPIO_PIN_RESET);
 	
 	HD44780_SendCommand(HD44780_COMMAND_CLEAR);
@@ -65,7 +67,7 @@ void HD44780_Initialize(void)
 void HD44780_SendMessage(char message[])
 {
 	for(int i=0; i<strlen(message); i++) {
-		circular_buf_put(message[i]);
+		circular_buf_put(commands_buffer, message[i]);
 	}
 }
 
@@ -90,11 +92,11 @@ enum BusStates eState = HIGH_STATE;
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if (eState == LOW_STATE && !circular_buf_empty())
+	if (eState == LOW_STATE && !circular_buf_empty(commands_buffer))
 	{
 		HAL_GPIO_WritePin(GPIOC, HD44780_E_Pin, GPIO_PIN_SET);
 		eState = HIGH_STATE;
-		int data = circular_buf_get();	
+		int data = circular_buf_get(commands_buffer);	
 		for (int i=0; i<8; i++) 
 		{
 			int value = (1 & (data >> i));
