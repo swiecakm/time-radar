@@ -1,7 +1,5 @@
 #include "circularbuf.h"
 
-circular_buffer_t* circular_buf_initialize_new(void);
-
 circular_buffer_t* circular_buf_initialize(uint8_t buff_size)
 {
 	circular_buffer_t *buff = (circular_buffer_t *) malloc(sizeof(circular_buffer_t));
