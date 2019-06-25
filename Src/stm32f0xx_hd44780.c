@@ -28,7 +28,7 @@ uint16_t HD44780_OUTPINS[8] = {
 };
 
 const int HD44780_COMMAND_DELAY = 100;
-const int8_t HD44780_COMMANDS_BUFF_SIZE = (int8_t)127;
+const uint8_t HD44780_COMMANDS_BUFF_SIZE = (uint8_t)128;
 
 circular_buffer_t *commands_buffer;
 
