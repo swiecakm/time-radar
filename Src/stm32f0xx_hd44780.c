@@ -38,6 +38,7 @@ void TIM16_IRQHandler(void)
 
 void HD44780_Initialize(void)
 {
+	circular_buf_initialize();
 	HAL_GPIO_WritePin(GPIOC, HD44780_RS_Pin, GPIO_PIN_RESET);
 	
 	HD44780_SendCommand(HD44780_COMMAND_CLEAR);

@@ -1,39 +1,60 @@
 #include "circularbuf.h"
 #define BUFF_SIZE 127
 
-int8_t commands_buff[BUFF_SIZE];
-int8_t head = 0;
-int8_t tail = 0;
-int8_t size = BUFF_SIZE;
+typedef struct
+{
+	int8_t *commands_buff;
+	int8_t head ;
+	int8_t tail;
+	int8_t size;
+} circular_buffer;
+
+circular_buffer* commands_buf;
+circular_buffer* circular_buf_initialize_new(void);
+
+void circular_buf_initialize()
+{
+	commands_buf = circular_buf_initialize_new();
+}
+
+circular_buffer* circular_buf_initialize_new()
+{
+	circular_buffer *commands_buf = (circular_buffer *) malloc(sizeof(circular_buffer));
+	commands_buf->commands_buff = (int8_t *) malloc(sizeof(int8_t)*BUFF_SIZE);
+	commands_buf->head = 0;
+	commands_buf->tail = 0;
+	commands_buf->size = BUFF_SIZE;
+	return commands_buf;
+}
 
 void circular_buf_put(int8_t value)
 {
-	commands_buff[head] = value;
-	if(head < size) 
+	commands_buf->commands_buff[commands_buf->head] = value;
+	if(commands_buf->head < commands_buf->size) 
 	{
-		head++;
+		commands_buf->head++;
 	}
 	else
 	{
-		head = 0;
+		commands_buf->head = 0;
 	}
 }
 
 int circular_buf_get(void)
 {
-	int value = commands_buff[tail];
-	if(tail < size) 
+	int value = commands_buf->commands_buff[commands_buf->tail];
+	if(commands_buf->tail < commands_buf->size) 
 	{
-		tail++;
+		commands_buf->tail++;
 	}
 	else
 	{
-		tail = 0;
+		commands_buf->tail = 0;
 	}
 	return value;
 }
 
 int circular_buf_empty(void)
 {
-	return head == tail;
+	return commands_buf->head == commands_buf->tail;
 }
