@@ -4,42 +4,42 @@ circular_buffer_t* circular_buf_initialize_new(void);
 
 circular_buffer_t* circular_buf_initialize(uint8_t buff_size)
 {
-	circular_buffer_t *commands_buf = (circular_buffer_t *) malloc(sizeof(circular_buffer_t));
-	commands_buf->commands_buff = (int8_t *) malloc(sizeof(int8_t)*buff_size);
-	commands_buf->head = 0;
-	commands_buf->tail = 0;
-	commands_buf->size = buff_size;
-	return commands_buf;
+	circular_buffer_t *buff = (circular_buffer_t *) malloc(sizeof(circular_buffer_t));
+	buff->buff_array = (int8_t *) malloc(sizeof(int8_t)*buff_size);
+	buff->head = 0;
+	buff->tail = 0;
+	buff->size = buff_size;
+	return buff;
 }
 
-void circular_buf_put(circular_buffer_t* commands_buf, int8_t value)
+void circular_buf_put(circular_buffer_t* buff, int8_t value)
 {
-	commands_buf->commands_buff[commands_buf->head] = value;
-	if(commands_buf->head < commands_buf->size) 
+	buff->buff_array[buff->head] = value;
+	if(buff->head < buff->size) 
 	{
-		commands_buf->head++;
+		buff->head++;
 	}
 	else
 	{
-		commands_buf->head = 0;
+		buff->head = 0;
 	}
 }
 
-int circular_buf_get(circular_buffer_t* commands_buf)
+int circular_buf_get(circular_buffer_t* buff)
 {
-	int value = commands_buf->commands_buff[commands_buf->tail];
-	if(commands_buf->tail < commands_buf->size) 
+	int value = buff->buff_array[buff->tail];
+	if(buff->tail < buff->size) 
 	{
-		commands_buf->tail++;
+		buff->tail++;
 	}
 	else
 	{
-		commands_buf->tail = 0;
+		buff->tail = 0;
 	}
 	return value;
 }
 
-int circular_buf_empty(circular_buffer_t* commands_buf)
+int circular_buf_empty(circular_buffer_t* buff)
 {
-	return commands_buf->head == commands_buf->tail;
+	return buff->head == buff->tail;
 }

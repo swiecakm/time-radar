@@ -9,7 +9,7 @@
 
 typedef struct
 {
-	int8_t *commands_buff;
+	int8_t *buff_array;
 	uint8_t head ;
 	uint8_t tail;
 	uint8_t size;
