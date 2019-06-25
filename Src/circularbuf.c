@@ -1,16 +1,14 @@
 #include "circularbuf.h"
-#define BUFF_SIZE 127
-
 
 circular_buffer_t* circular_buf_initialize_new(void);
 
-circular_buffer_t* circular_buf_initialize()
+circular_buffer_t* circular_buf_initialize(int8_t buff_size)
 {
 	circular_buffer_t *commands_buf = (circular_buffer_t *) malloc(sizeof(circular_buffer_t));
-	commands_buf->commands_buff = (int8_t *) malloc(sizeof(int8_t)*BUFF_SIZE);
+	commands_buf->commands_buff = (int8_t *) malloc(sizeof(int8_t)*buff_size);
 	commands_buf->head = 0;
 	commands_buf->tail = 0;
-	commands_buf->size = BUFF_SIZE;
+	commands_buf->size = buff_size;
 	return commands_buf;
 }
 

@@ -15,7 +15,7 @@ typedef struct
 	int8_t size;
 } circular_buffer_t;
 
-circular_buffer_t* circular_buf_initialize(void);
+circular_buffer_t* circular_buf_initialize(int8_t);
 
 int circular_buf_empty(circular_buffer_t*);
 

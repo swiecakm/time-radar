@@ -28,6 +28,7 @@ uint16_t HD44780_OUTPINS[8] = {
 };
 
 const int HD44780_COMMAND_DELAY = 100;
+const int8_t HD44780_COMMANDS_BUFF_SIZE = (int8_t)127;
 
 circular_buffer_t *commands_buffer;
 
@@ -40,7 +41,7 @@ void TIM16_IRQHandler(void)
 
 void HD44780_Initialize(void)
 {
-	commands_buffer = circular_buf_initialize();
+	commands_buffer = circular_buf_initialize(HD44780_COMMANDS_BUFF_SIZE);
 	HAL_GPIO_WritePin(GPIOC, HD44780_RS_Pin, GPIO_PIN_RESET);
 	
 	HD44780_SendCommand(HD44780_COMMAND_CLEAR);
