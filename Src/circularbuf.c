@@ -7,19 +7,19 @@ typedef struct
 	int8_t head ;
 	int8_t tail;
 	int8_t size;
-} circular_buffer;
+} circular_buffer_t;
 
-circular_buffer* commands_buf;
-circular_buffer* circular_buf_initialize_new(void);
+circular_buffer_t* commands_buf;
+circular_buffer_t* circular_buf_initialize_new(void);
 
 void circular_buf_initialize()
 {
 	commands_buf = circular_buf_initialize_new();
 }
 
-circular_buffer* circular_buf_initialize_new()
+circular_buffer_t* circular_buf_initialize_new()
 {
-	circular_buffer *commands_buf = (circular_buffer *) malloc(sizeof(circular_buffer));
+	circular_buffer_t *commands_buf = (circular_buffer_t *) malloc(sizeof(circular_buffer_t));
 	commands_buf->commands_buff = (int8_t *) malloc(sizeof(int8_t)*BUFF_SIZE);
 	commands_buf->head = 0;
 	commands_buf->tail = 0;
