@@ -15,6 +15,9 @@
 #define HD44780_COMMAND_DISPLAY_MOVE_DISPLAY 16
 #define HD44780_COMMAND_8BIT_TWO_LINES_5x8 56
 
+//other used commands
+#define HD44780_COMMAND_GO_TO_SECOND_LINE 192
+
 
 uint16_t HD44780_OUTPINS[8] = {
 	HD44780_D0_Pin,
@@ -58,6 +61,11 @@ void HD44780_Initialize(void)
 void HD44780_Clear(void)
 {
 	circular_buf_put(commands_buffer, HD44780_COMMAND_CLEAR);
+}
+
+void HD44780_GoToSecondLine(void)
+{
+	circular_buf_put(commands_buffer, HD44780_COMMAND_GO_TO_SECOND_LINE);
 }
 
 void HD44780_SendMessage(char message[])

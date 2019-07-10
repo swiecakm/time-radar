@@ -7,4 +7,6 @@ void HD44780_InitializeTimer(void);
 void HD44780_SendMessage(char[]);
 
 void HD44780_Clear(void);
+
+void HD44780_GoToSecondLine(void);
 #endif

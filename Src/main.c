@@ -127,7 +127,7 @@ int main(void)
 	
 	HAL_Delay(1000);
 	
-	HD44780_Clear();
+	HD44780_GoToSecondLine();
 	HD44780_SendMessage(mainmessage);
   
 	while (1)
