@@ -55,6 +55,11 @@ void HD44780_Initialize(void)
 	HD44780_InitializeTimer();
 }
 
+void HD44780_Clear(void)
+{
+	circular_buf_put(commands_buffer, HD44780_COMMAND_CLEAR);
+}
+
 void HD44780_SendMessage(char message[])
 {
 	for(int i=0; i<strlen(message); i++) {

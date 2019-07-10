@@ -87,7 +87,8 @@ static void MX_GPIO_Init(void);
   * @retval int
   */
 	
-char message[] = "Hello world! This is test!";
+char hellomessage[] = "Hello world!";
+char mainmessage[] = "This is test!";
 	
 int main(void)
 {
@@ -122,8 +123,14 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	HD44780_SendMessage(message);
-  while (1)
+	HD44780_SendMessage(hellomessage);
+	
+	HAL_Delay(1000);
+	
+	HD44780_Clear();
+	HD44780_SendMessage(mainmessage);
+  
+	while (1)
   {
     /* USER CODE END WHILE */
 
