@@ -46,7 +46,6 @@ char shortmessage[] = "MESSAGE:";
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -137,9 +136,36 @@ int main(void)
 	HAL_Delay(1000);
 	HD44780_GoToFirstLine();
 	HD44780_SendMessage(shortmessage);
+	
+	RTC_TimeTypeDef sTime;
+	RTC_DateTypeDef sDate;
+	sTime.Hours = (2<<4) + 2;
+  sTime.Minutes = 0; 
+  sTime.Seconds = 2;
+	HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
+	
 	  
 	while (1)
   {
+		HAL_RTC_WaitForSynchro(&hrtc);
+		HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
+		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
+		
+		HD44780_Clear();
+		
+		char timeMessage[] = "  :  :  ";
+			
+		timeMessage[0] = (uint8_t)(0xF & (sTime.Hours >> 4)) + '0';
+		timeMessage[1] = (uint8_t)(0xF &  sTime.Hours) + '0';
+		
+		timeMessage[3] = (uint8_t)(0xF & (sTime.Minutes >> 4)) + '0';
+		timeMessage[4] = (uint8_t)(0xF &  sTime.Minutes) + '0';
+		
+		timeMessage[6] = (uint8_t)(0xF & (sTime.Seconds >> 4)) + '0';
+		timeMessage[7] = (uint8_t)(0xF &  sTime.Seconds) + '0';
+		
+		HD44780_SendMessage(timeMessage);
+		HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -239,12 +265,18 @@ static void MX_RTC_Init(void)
   {
     Error_Handler();
   }
-  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
-  sDate.Month = RTC_MONTH_JANUARY;
-  sDate.Date = 0x1;
-  sDate.Year = 0x0;
+  sDate.WeekDay = RTC_WEEKDAY_WEDNESDAY;
+  sDate.Month = RTC_MONTH_JULY;
+  sDate.Date = 0x10;
+  sDate.Year = 0x19;
 
   if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /**Enable the TimeStamp 
+  */
+  if (HAL_RTCEx_SetTimeStamp(&hrtc, RTC_TIMESTAMPEDGE_RISING, RTC_TIMESTAMPPIN_DEFAULT) != HAL_OK)
   {
     Error_Handler();
   }
