@@ -63,6 +63,11 @@ void HD44780_Clear(void)
 	circular_buf_put(commands_buffer, HD44780_COMMAND_CLEAR);
 }
 
+void HD44780_GoToFirstLine(void)
+{
+	circular_buf_put(commands_buffer, HD44780_COMMAND_RETURN_HOME);
+}
+
 void HD44780_GoToSecondLine(void)
 {
 	circular_buf_put(commands_buffer, HD44780_COMMAND_GO_TO_SECOND_LINE);

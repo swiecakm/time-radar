@@ -89,6 +89,7 @@ static void MX_GPIO_Init(void);
 	
 char hellomessage[] = "Hello world!";
 char mainmessage[] = "This is test!";
+char shortmessage[] = "MESSAGE:";
 	
 int main(void)
 {
@@ -126,9 +127,13 @@ int main(void)
 	HD44780_SendMessage(hellomessage);
 	
 	HAL_Delay(1000);
-	
+	HD44780_Clear();
+	HAL_Delay(1000);
 	HD44780_GoToSecondLine();
 	HD44780_SendMessage(mainmessage);
+	HAL_Delay(1000);
+	HD44780_GoToFirstLine();
+	HD44780_SendMessage(shortmessage);
   
 	while (1)
   {
