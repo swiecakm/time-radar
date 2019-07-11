@@ -71,7 +71,8 @@ RTC_HandleTypeDef hrtc;
 /* USER CODE BEGIN PV */
 char hellomessage[] = "Hello!";
 char mainmessage[] = "Clock v1.0";
-
+RTC_TimeTypeDef sTime;
+RTC_DateTypeDef sDate;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -86,6 +87,43 @@ void UpdateDateTimeMessage(RTC_TimeTypeDef*, RTC_DateTypeDef*, char*);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+void UpdateDateTimeMessage(RTC_TimeTypeDef *sTime, RTC_DateTypeDef *sDate, char *timeMessage)
+{
+	timeMessage[0] = (uint8_t)(0xF & (sDate->Date >> 4)) + '0';
+	timeMessage[1] = (uint8_t)(0xF & sDate->Date) + '0';
+	
+	timeMessage[3] = (uint8_t)(0xF & (sDate->Month >> 4)) + '0';
+	timeMessage[4] = (uint8_t)(0xF & sDate->Month) + '0';
+	
+	timeMessage[6] = '2';
+	timeMessage[7] = '0';
+	
+	timeMessage[8] = (uint8_t)(0xF & (sDate->Year >> 4)) + '0';
+	timeMessage[9] = (uint8_t)(0xF & sDate->Year) + '0';
+	
+	timeMessage[11] = (uint8_t)(0xF & (sTime->Hours >> 4)) + '0';
+	timeMessage[12] = (uint8_t)(0xF &  sTime->Hours) + '0';
+	
+	timeMessage[14] = (uint8_t)(0xF & (sTime->Minutes >> 4)) + '0';
+	timeMessage[15] = (uint8_t)(0xF &  sTime->Minutes) + '0';
+}
+
+void IncrementYear(void)
+{
+	sDate.Year = sDate.Year + 1;
+	//repair invalid bcd state
+	if ((0xF & sDate.Year) > 9)
+	{
+		//ommit all invalid states 10 - 15
+		sDate.Year = sDate.Year + 6;
+	}
+	if (sDate.Year > 0x99)
+	{
+		sDate.Year = 0x0;
+	}
+	HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
+}
 
 /* USER CODE END 0 */
 
@@ -135,8 +173,6 @@ int main(void)
 	HAL_Delay(2000);
 	HD44780_GoToFirstLine();
 	
-	RTC_TimeTypeDef sTime;
-	RTC_DateTypeDef sDate;
 	sTime.Hours = (2<<4) + 2;
   sTime.Minutes = 0; 
   sTime.Seconds = 2;
@@ -151,7 +187,7 @@ int main(void)
 		HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
 		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
 		
-		if (sTime.Minutes != prevMinutes)
+		if (1)//(sTime.Minutes != prevMinutes)
 		{
 			prevMinutes = sTime.Minutes;
 			UpdateDateTimeMessage(&sTime, &sDate, timeMessage);			
@@ -166,27 +202,6 @@ int main(void)
 		
   }
   /* USER CODE END 3 */
-}
-
-void UpdateDateTimeMessage(RTC_TimeTypeDef *sTime, RTC_DateTypeDef *sDate, char *timeMessage)
-{
-			timeMessage[0] = (uint8_t)(0xF & (sDate->Date >> 4)) + '0';
-			timeMessage[1] = (uint8_t)(0xF & sDate->Date) + '0';
-			
-			timeMessage[3] = (uint8_t)(0xF & (sDate->Month >> 4)) + '0';
-			timeMessage[4] = (uint8_t)(0xF & sDate->Month) + '0';
-			
-			timeMessage[6] = '2';
-			timeMessage[7] = '0';
-			
-			timeMessage[8] = (uint8_t)(0xF & (sDate->Year >> 4)) + '0';
-			timeMessage[9] = (uint8_t)(0xF & sDate->Year) + '0';
-			
-			timeMessage[11] = (uint8_t)(0xF & (sTime->Hours >> 4)) + '0';
-			timeMessage[12] = (uint8_t)(0xF &  sTime->Hours) + '0';
-			
-			timeMessage[14] = (uint8_t)(0xF & (sTime->Minutes >> 4)) + '0';
-			timeMessage[15] = (uint8_t)(0xF &  sTime->Minutes) + '0';
 }
 
 /**
@@ -280,10 +295,10 @@ static void MX_RTC_Init(void)
   {
     Error_Handler();
   }
-  sDate.WeekDay = RTC_WEEKDAY_WEDNESDAY;
-  sDate.Month = RTC_MONTH_JULY;
-  sDate.Date = 0x10;
-  sDate.Year = 0x19;
+  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
+  sDate.Month = RTC_MONTH_JANUARY;
+  sDate.Date = 0x1;
+  sDate.Year = 0x1;
 
   if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD) != HAL_OK)
   {
@@ -332,9 +347,13 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_EVT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
 
 }
 

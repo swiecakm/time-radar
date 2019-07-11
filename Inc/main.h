@@ -58,6 +58,7 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
+
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -73,8 +74,9 @@ extern "C" {
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
-/* USER CODE BEGIN EFP */
 
+/* USER CODE BEGIN EFP */
+void IncrementYear(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -88,6 +90,7 @@ void Error_Handler(void);
 #define HD44780_D3_GPIO_Port GPIOC
 #define B1_Pin GPIO_PIN_0
 #define B1_GPIO_Port GPIOA
+#define B1_EXTI_IRQn EXTI0_1_IRQn
 #define HD44780_D4_Pin GPIO_PIN_4
 #define HD44780_D4_GPIO_Port GPIOC
 #define HD44780_D5_Pin GPIO_PIN_5
