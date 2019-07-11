@@ -36,10 +36,8 @@
   *
   ******************************************************************************
   */
-#include "stm32f0xx_hd44780.h"
 
-char hellomessage[] = "Hello!";
-char mainmessage[] = "Clock v1.0";
+
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -47,6 +45,7 @@ char mainmessage[] = "Clock v1.0";
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stm32f0xx_hd44780.h"
 
 /* USER CODE END Includes */
 
@@ -70,6 +69,8 @@ char mainmessage[] = "Clock v1.0";
 RTC_HandleTypeDef hrtc;
 
 /* USER CODE BEGIN PV */
+char hellomessage[] = "Hello!";
+char mainmessage[] = "Clock v1.0";
 
 /* USER CODE END PV */
 
