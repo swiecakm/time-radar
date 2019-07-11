@@ -153,16 +153,25 @@ int main(void)
 		
 		HD44780_Clear();
 		
-		char timeMessage[] = "  :  :  ";
-			
-		timeMessage[0] = (uint8_t)(0xF & (sTime.Hours >> 4)) + '0';
-		timeMessage[1] = (uint8_t)(0xF &  sTime.Hours) + '0';
+		char timeMessage[] = "  .  .       :  ";
 		
-		timeMessage[3] = (uint8_t)(0xF & (sTime.Minutes >> 4)) + '0';
-		timeMessage[4] = (uint8_t)(0xF &  sTime.Minutes) + '0';
+		timeMessage[0] = (uint8_t)(0xF & (sDate.Date >> 4)) + '0';
+		timeMessage[1] = (uint8_t)(0xF & sDate.Date) + '0';
 		
-		timeMessage[6] = (uint8_t)(0xF & (sTime.Seconds >> 4)) + '0';
-		timeMessage[7] = (uint8_t)(0xF &  sTime.Seconds) + '0';
+		timeMessage[3] = (uint8_t)(0xF & (sDate.Month >> 4)) + '0';
+		timeMessage[4] = (uint8_t)(0xF & sDate.Month) + '0';
+		
+		timeMessage[6] = '2';
+		timeMessage[7] = '0';
+		
+		timeMessage[8] = (uint8_t)(0xF & (sDate.Year >> 4)) + '0';
+		timeMessage[9] = (uint8_t)(0xF & sDate.Year) + '0';
+		
+		timeMessage[11] = (uint8_t)(0xF & (sTime.Hours >> 4)) + '0';
+		timeMessage[12] = (uint8_t)(0xF &  sTime.Hours) + '0';
+		
+		timeMessage[14] = (uint8_t)(0xF & (sTime.Minutes >> 4)) + '0';
+		timeMessage[15] = (uint8_t)(0xF &  sTime.Minutes) + '0';
 		
 		HD44780_SendMessage(timeMessage);
 		HAL_Delay(1000);
