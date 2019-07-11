@@ -38,9 +38,8 @@
   */
 #include "stm32f0xx_hd44780.h"
 
-char hellomessage[] = "Hello world!";
-char mainmessage[] = "This is test!";
-char shortmessage[] = "MESSAGE:";
+char hellomessage[] = "Hello!";
+char mainmessage[] = "Clock v1.0";
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
@@ -127,15 +126,11 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 	HD44780_SendMessage(hellomessage);
-	
-	HAL_Delay(1000);
-	HD44780_Clear();
 	HAL_Delay(1000);
 	HD44780_GoToSecondLine();
 	HD44780_SendMessage(mainmessage);
-	HAL_Delay(1000);
+	HAL_Delay(2000);
 	HD44780_GoToFirstLine();
-	HD44780_SendMessage(shortmessage);
 	
 	RTC_TimeTypeDef sTime;
 	RTC_DateTypeDef sDate;
@@ -144,36 +139,39 @@ int main(void)
   sTime.Seconds = 2;
 	HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
 	
-	  
+	uint8_t prevMinutes = -1;
+	char timeMessage[] = "  .  .       :  ";
+	
 	while (1)
   {
 		HAL_RTC_WaitForSynchro(&hrtc);
 		HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
 		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
 		
-		HD44780_Clear();
-		
-		char timeMessage[] = "  .  .       :  ";
-		
-		timeMessage[0] = (uint8_t)(0xF & (sDate.Date >> 4)) + '0';
-		timeMessage[1] = (uint8_t)(0xF & sDate.Date) + '0';
-		
-		timeMessage[3] = (uint8_t)(0xF & (sDate.Month >> 4)) + '0';
-		timeMessage[4] = (uint8_t)(0xF & sDate.Month) + '0';
-		
-		timeMessage[6] = '2';
-		timeMessage[7] = '0';
-		
-		timeMessage[8] = (uint8_t)(0xF & (sDate.Year >> 4)) + '0';
-		timeMessage[9] = (uint8_t)(0xF & sDate.Year) + '0';
-		
-		timeMessage[11] = (uint8_t)(0xF & (sTime.Hours >> 4)) + '0';
-		timeMessage[12] = (uint8_t)(0xF &  sTime.Hours) + '0';
-		
-		timeMessage[14] = (uint8_t)(0xF & (sTime.Minutes >> 4)) + '0';
-		timeMessage[15] = (uint8_t)(0xF &  sTime.Minutes) + '0';
-		
-		HD44780_SendMessage(timeMessage);
+		if (sTime.Minutes != prevMinutes) {
+			prevMinutes = sTime.Minutes;
+			timeMessage[0] = (uint8_t)(0xF & (sDate.Date >> 4)) + '0';
+			timeMessage[1] = (uint8_t)(0xF & sDate.Date) + '0';
+			
+			timeMessage[3] = (uint8_t)(0xF & (sDate.Month >> 4)) + '0';
+			timeMessage[4] = (uint8_t)(0xF & sDate.Month) + '0';
+			
+			timeMessage[6] = '2';
+			timeMessage[7] = '0';
+			
+			timeMessage[8] = (uint8_t)(0xF & (sDate.Year >> 4)) + '0';
+			timeMessage[9] = (uint8_t)(0xF & sDate.Year) + '0';
+			
+			timeMessage[11] = (uint8_t)(0xF & (sTime.Hours >> 4)) + '0';
+			timeMessage[12] = (uint8_t)(0xF &  sTime.Hours) + '0';
+			
+			timeMessage[14] = (uint8_t)(0xF & (sTime.Minutes >> 4)) + '0';
+			timeMessage[15] = (uint8_t)(0xF &  sTime.Minutes) + '0';
+			
+			HD44780_Clear();
+			HD44780_SendMessage(timeMessage);
+		}
+				
 		HAL_Delay(1000);
     /* USER CODE END WHILE */
 
