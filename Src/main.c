@@ -318,6 +318,12 @@ int main(void)
 		
 		if (1)//(sTime.Minutes != prevMinutes)
 		{
+			
+			//If button hold for over 2s
+			if (B1_pushed && B1_PushedTime > 20)
+			{
+				IncrementDateTime(currentPosition);
+			}
 			prevMinutes = sTime.Minutes;
 			UpdateDateTimeMessage(&sTime, &sDate, timeMessage);			
 			HD44780_Clear();
@@ -350,16 +356,12 @@ int main(void)
 				}
 				B1_LastPushedTime = 0;
 			}
-	
+			
 			HD44780_SendMessage(buttonMessage);
 			HAL_Delay(100);
 			HD44780_GoToFirstLine();
 		}
-		// > 2s
-		if (B1_pushed && B1_PushedTime > 20)
-		{
-			IncrementDateTime(currentPosition);
-		}
+
 				
 		HAL_Delay(500);
     /* USER CODE END WHILE */
