@@ -316,7 +316,7 @@ int main(void)
 		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
 		int arrowPosition = -1;
 		
-		if (1)//(sTime.Minutes != prevMinutes)
+		if (sTime.Minutes != prevMinutes || B1_pushed || B1_LastPushedTime > 0)
 		{
 			
 			//If button hold for over 2s
