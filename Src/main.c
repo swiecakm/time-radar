@@ -42,6 +42,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "string.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -56,7 +57,15 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+enum SetTimePositions 
+{
+	MINUTES = 0,
+	HOURS = 1,
+	YEAR = 2,
+	MONTH = 3,
+	DAY = 4,
+	NONE = 5
+};
 
 /* USER CODE END PD */
 
@@ -78,6 +87,7 @@ RTC_DateTypeDef sDate;
 int B1_pushed = 0;
 int B1_PushedTime = 0;
 int B1_LastPushedTime = 0;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -115,6 +125,27 @@ void UpdateDateTimeMessage(RTC_TimeTypeDef *sTime, RTC_DateTypeDef *sDate, char 
 	timeMessage[15] = (uint8_t)(0xF &  sTime->Minutes) + '0';
 }
 
+int GetArrowPosition(enum SetTimePositions position)
+{
+		int arrowPosition = 0;
+		switch (position)
+		{
+			case MINUTES:
+				arrowPosition = 15; break;
+			case HOURS:
+				arrowPosition = 12; break;
+			case YEAR:
+				arrowPosition = 9; break;
+			case MONTH:
+				arrowPosition = 4; break;
+			case DAY:
+				arrowPosition = 1; break;
+			default:
+				arrowPosition = -1; break;
+		}
+		return arrowPosition;
+}
+
 void IncrementYear(void)
 {
 	sDate.Year = sDate.Year + 1;
@@ -148,8 +179,8 @@ void IncrementB1PushedTime(void)
 
 void ResetB1PushedTime(void)
 {
-	//longer than 200 ms
-	if (B1_PushedTime > 2)
+	//longer than 100 ms
+	if (B1_PushedTime > 1)
 	{
 		B1_LastPushedTime = B1_PushedTime;
 	}
@@ -212,7 +243,9 @@ int main(void)
 	
 	uint8_t prevMinutes = -1;
 	char timeMessage[] = "  .  .       :  ";
-	char buttonMessage[] = " ";
+	char buttonMessage[] = "                ";
+	
+	enum SetTimePositions currentPosition = NONE;
 	
 	HAL_NVIC_EnableIRQ(TIM14_IRQn);
 	HAL_TIM_Base_Start_IT(&htim14);
@@ -222,6 +255,7 @@ int main(void)
 		HAL_RTC_WaitForSynchro(&hrtc);
 		HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
 		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
+		int arrowPosition = -1;
 		
 		if (1)//(sTime.Minutes != prevMinutes)
 		{
@@ -231,18 +265,33 @@ int main(void)
 			HD44780_SendMessage(timeMessage);
 			HAL_Delay(100);
 			HD44780_GoToSecondLine();
-			if(B1_LastPushedTime > 20)
+			//0.1s - 1s
+			if(B1_LastPushedTime > 1 && B1_LastPushedTime < 10)
 			{
-				buttonMessage[0] = '2';
+				if(currentPosition == NONE)
+				{
+					currentPosition = MINUTES;
+				}
+				else
+				{
+					currentPosition++;
+				}
+				arrowPosition = GetArrowPosition(currentPosition); 
+
+				for (int i=0; i<strlen(buttonMessage); i++)
+				{
+					if (i != arrowPosition)
+					{
+						buttonMessage[i] = ' ';
+					}
+					else
+					{
+						buttonMessage[i] = '^';
+					}			
+				}
+				B1_LastPushedTime = 0;
 			}
-			else if(B1_LastPushedTime > 10)
-			{
-				buttonMessage[0] = '1';
-			}
-			else
-			{
-				buttonMessage[0] = '0';
-			}
+	
 			HD44780_SendMessage(buttonMessage);
 			HAL_Delay(100);
 			HD44780_GoToFirstLine();

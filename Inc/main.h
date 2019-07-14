@@ -74,7 +74,6 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-void IncrementYear(void);
 void SetButtonPushed(void);
 void SetButtonNotPushed(void);
 void IncrementB1PushedTime(void);
