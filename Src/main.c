@@ -98,6 +98,15 @@ static void MX_TIM14_Init(void);
 /* USER CODE BEGIN PFP */
 
 void UpdateDateTimeMessage(RTC_TimeTypeDef*, RTC_DateTypeDef*, char*);
+int GetArrowPosition(enum SetTimePositions);
+void IncrementDateTime(enum SetTimePositions position);
+uint8_t IncrementBDCValue(uint8_t, uint8_t);
+void IncrementMinutes(void);
+void IncrementHours(void);
+void IncrementYear(void);
+void IncrementMonth(void);
+void IncrementDay(void);
+
 	
 /* USER CODE END PFP */
 
@@ -146,6 +155,25 @@ int GetArrowPosition(enum SetTimePositions position)
 		return arrowPosition;
 }
 
+void IncrementDateTime(enum SetTimePositions position)
+{
+		switch (position)
+		{
+			case MINUTES:
+				IncrementMinutes(); break;
+			case HOURS:
+				IncrementHours(); break;
+			case YEAR:
+				IncrementYear(); break;
+			case MONTH:
+				IncrementMonth(); break;
+			case DAY:
+				IncrementDay(); break;
+			default:
+				break;
+		}
+}
+
 //only for numbers < 100
 uint8_t IncrementBDCValue(uint8_t value, uint8_t max)
 {
@@ -163,9 +191,33 @@ uint8_t IncrementBDCValue(uint8_t value, uint8_t max)
 	return value;
 }
 
+void IncrementMinutes(void)
+{
+	sTime.Minutes = IncrementBDCValue(sTime.Minutes, 0x60);
+	HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
+}
+
+void IncrementHours(void)
+{
+	sTime.Hours = IncrementBDCValue(sTime.Hours, 0x24);
+	HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
+}
+
 void IncrementYear(void)
 {
 	sDate.Year = IncrementBDCValue(sDate.Year, 0x99);
+	HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
+}
+
+void IncrementMonth(void)
+{
+	sDate.Month = IncrementBDCValue(sDate.Month, 0x12);
+	HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
+}
+
+void IncrementDay(void)
+{
+	sDate.Date = IncrementBDCValue(sDate.Date, 0x31);
 	HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
 }
 
@@ -306,13 +358,10 @@ int main(void)
 		// > 2s
 		if (B1_pushed && B1_PushedTime > 20)
 		{
-			if (currentPosition == YEAR)
-			{
-				IncrementYear();
-			}
+			IncrementDateTime(currentPosition);
 		}
 				
-		HAL_Delay(1000);
+		HAL_Delay(500);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
