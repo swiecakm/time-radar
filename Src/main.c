@@ -146,19 +146,26 @@ int GetArrowPosition(enum SetTimePositions position)
 		return arrowPosition;
 }
 
-void IncrementYear(void)
+//only for numbers < 100
+uint8_t IncrementBDCValue(uint8_t value, uint8_t max)
 {
-	sDate.Year = sDate.Year + 1;
+	value = value + 1;
 	//repair invalid bcd state
-	if ((0xF & sDate.Year) > 9)
+	if ((0xF & value) > 9)
 	{
 		//ommit all invalid states 10 - 15
-		sDate.Year = sDate.Year + 6;
+		value = value + 6;
 	}
-	if (sDate.Year > 0x99)
+	if (value > max)
 	{
-		sDate.Year = 0x0;
+		value = 0x0;
 	}
+	return value;
+}
+
+void IncrementYear(void)
+{
+	sDate.Year = IncrementBDCValue(sDate.Year, 0x99);
 	HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
 }
 
@@ -295,6 +302,14 @@ int main(void)
 			HD44780_SendMessage(buttonMessage);
 			HAL_Delay(100);
 			HD44780_GoToFirstLine();
+		}
+		// > 2s
+		if (B1_pushed && B1_PushedTime > 20)
+		{
+			if (currentPosition == YEAR)
+			{
+				IncrementYear();
+			}
 		}
 				
 		HAL_Delay(1000);
