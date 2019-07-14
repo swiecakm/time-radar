@@ -71,6 +71,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern TIM_HandleTypeDef htim14;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -165,6 +166,28 @@ void EXTI0_1_IRQHandler(void)
   /* USER CODE BEGIN EXTI0_1_IRQn 1 */
 
   /* USER CODE END EXTI0_1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM14 global interrupt.
+  */
+void TIM14_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM14_IRQn 0 */
+	if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin))
+	{
+		SetButtonPushed();		
+	}
+	else
+	{
+		SetButtonNotPushed();
+	}
+
+  /* USER CODE END TIM14_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim14);
+  /* USER CODE BEGIN TIM14_IRQn 1 */
+
+  /* USER CODE END TIM14_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

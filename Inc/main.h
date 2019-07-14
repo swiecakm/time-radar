@@ -11,7 +11,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * COPYRIGHT(c) 2018 STMicroelectronics
+  * COPYRIGHT(c) 2019 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -58,7 +58,6 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 
-
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
@@ -74,9 +73,10 @@ extern "C" {
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
-
 /* USER CODE BEGIN EFP */
 void IncrementYear(void);
+void SetButtonPushed(void);
+void SetButtonNotPushed(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

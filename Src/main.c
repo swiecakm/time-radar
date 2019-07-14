@@ -68,17 +68,21 @@
 /* Private variables ---------------------------------------------------------*/
 RTC_HandleTypeDef hrtc;
 
+TIM_HandleTypeDef htim14;
+
 /* USER CODE BEGIN PV */
 char hellomessage[] = "Hello!";
 char mainmessage[] = "Clock v1.0";
 RTC_TimeTypeDef sTime;
 RTC_DateTypeDef sDate;
+int B1_pushed = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_RTC_Init(void);
+static void MX_TIM14_Init(void);
 /* USER CODE BEGIN PFP */
 
 void UpdateDateTimeMessage(RTC_TimeTypeDef*, RTC_DateTypeDef*, char*);
@@ -125,6 +129,16 @@ void IncrementYear(void)
 	HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
 }
 
+void SetButtonPushed(void)
+{
+	B1_pushed = 1;
+}
+
+void SetButtonNotPushed(void)
+{
+	B1_pushed = 0;
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -156,6 +170,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_RTC_Init();
+  MX_TIM14_Init();
   /* USER CODE BEGIN 2 */
 	HD44780_Initialize();
 	
@@ -180,6 +195,10 @@ int main(void)
 	
 	uint8_t prevMinutes = -1;
 	char timeMessage[] = "  .  .       :  ";
+	char buttonMessage[] = " ";
+	
+	HAL_NVIC_EnableIRQ(TIM14_IRQn);
+	HAL_TIM_Base_Start_IT(&htim14);
 	
 	while (1)
   {
@@ -193,6 +212,12 @@ int main(void)
 			UpdateDateTimeMessage(&sTime, &sDate, timeMessage);			
 			HD44780_Clear();
 			HD44780_SendMessage(timeMessage);
+			HAL_Delay(100);
+			HD44780_GoToSecondLine();
+			buttonMessage[0] = '0' + B1_pushed;
+			HD44780_SendMessage(buttonMessage);
+			HAL_Delay(100);
+			HD44780_GoToFirstLine();
 		}
 				
 		HAL_Delay(1000);
@@ -313,6 +338,37 @@ static void MX_RTC_Init(void)
   /* USER CODE BEGIN RTC_Init 2 */
 
   /* USER CODE END RTC_Init 2 */
+
+}
+
+/**
+  * @brief TIM14 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM14_Init(void)
+{
+
+  /* USER CODE BEGIN TIM14_Init 0 */
+
+  /* USER CODE END TIM14_Init 0 */
+
+  /* USER CODE BEGIN TIM14_Init 1 */
+
+  /* USER CODE END TIM14_Init 1 */
+  htim14.Instance = TIM14;
+  htim14.Init.Prescaler = 4799;
+  htim14.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim14.Init.Period = 9;
+  htim14.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim14.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim14) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM14_Init 2 */
+
+  /* USER CODE END TIM14_Init 2 */
 
 }
 
