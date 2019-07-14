@@ -161,6 +161,7 @@ void EXTI0_1_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_1_IRQn 0 */
 	IncrementYear();
+	ResetB1PushedTime();
   /* USER CODE END EXTI0_1_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
   /* USER CODE BEGIN EXTI0_1_IRQn 1 */
@@ -176,7 +177,8 @@ void TIM14_IRQHandler(void)
   /* USER CODE BEGIN TIM14_IRQn 0 */
 	if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin))
 	{
-		SetButtonPushed();		
+		SetButtonPushed();	
+		IncrementB1PushedTime();		
 	}
 	else
 	{

@@ -77,6 +77,8 @@ void Error_Handler(void);
 void IncrementYear(void);
 void SetButtonPushed(void);
 void SetButtonNotPushed(void);
+void IncrementB1PushedTime(void);
+void ResetB1PushedTime(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/

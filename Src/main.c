@@ -76,6 +76,8 @@ char mainmessage[] = "Clock v1.0";
 RTC_TimeTypeDef sTime;
 RTC_DateTypeDef sDate;
 int B1_pushed = 0;
+int B1_PushedTime = 0;
+int B1_LastPushedTime = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -137,6 +139,21 @@ void SetButtonPushed(void)
 void SetButtonNotPushed(void)
 {
 	B1_pushed = 0;
+}
+
+void IncrementB1PushedTime(void)
+{
+	B1_PushedTime ++;
+}
+
+void ResetB1PushedTime(void)
+{
+	//longer than 200 ms
+	if (B1_PushedTime > 2)
+	{
+		B1_LastPushedTime = B1_PushedTime;
+	}
+	B1_PushedTime = 0;
 }
 
 /* USER CODE END 0 */
@@ -214,7 +231,18 @@ int main(void)
 			HD44780_SendMessage(timeMessage);
 			HAL_Delay(100);
 			HD44780_GoToSecondLine();
-			buttonMessage[0] = '0' + B1_pushed;
+			if(B1_LastPushedTime > 20)
+			{
+				buttonMessage[0] = '2';
+			}
+			else if(B1_LastPushedTime > 10)
+			{
+				buttonMessage[0] = '1';
+			}
+			else
+			{
+				buttonMessage[0] = '0';
+			}
 			HD44780_SendMessage(buttonMessage);
 			HAL_Delay(100);
 			HD44780_GoToFirstLine();
@@ -357,9 +385,9 @@ static void MX_TIM14_Init(void)
 
   /* USER CODE END TIM14_Init 1 */
   htim14.Instance = TIM14;
-  htim14.Init.Prescaler = 4799;
+  htim14.Init.Prescaler = 47999;
   htim14.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim14.Init.Period = 9;
+  htim14.Init.Period = 99;
   htim14.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim14.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim14) != HAL_OK)
@@ -403,7 +431,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : B1_Pin */
   GPIO_InitStruct.Pin = B1_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
 
