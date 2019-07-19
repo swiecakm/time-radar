@@ -353,7 +353,10 @@ int main(void)
 					{
 						buttonMessage[i] = '^';
 					}			
-				}
+				}		
+			}
+			if(B1_LastPushedTime > 0)
+			{
 				B1_LastPushedTime = 0;
 			}
 			
