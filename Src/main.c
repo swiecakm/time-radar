@@ -87,6 +87,10 @@ RTC_DateTypeDef sDate;
 int B1_pushed = 0;
 int B1_PushedTime = 0;
 int B1_LastPushedTime = 0;
+//temperature and humidity sensor variables
+int AM2302_BitsReceivedCount = 0;
+int AM2302_RequestSent = 0;
+int AM2302_BitsReceived[40];
 
 /* USER CODE END PV */
 
@@ -107,6 +111,8 @@ void IncrementHours(void);
 void IncrementYear(void);
 void IncrementMonth(void);
 void IncrementDay(void);
+void UpdateAM2302_BitsReceivedCountMessage(char*);
+void AM2302_SendRequest();
 
 	
 /* USER CODE END PFP */
@@ -133,6 +139,16 @@ void UpdateDateTimeMessage(RTC_TimeTypeDef *sTime, RTC_DateTypeDef *sDate, char 
 	
 	timeMessage[14] = (uint8_t)(0xF & (sTime->Minutes >> 4)) + '0';
 	timeMessage[15] = (uint8_t)(0xF &  sTime->Minutes) + '0';
+}
+
+void UpdateAM2302_BitsReceivedCountMessage(char *message)
+{
+	message[5] = (uint8_t)(AM2302_BitsReceivedCount % 10) + '0';
+	message[4] = (uint8_t)((AM2302_BitsReceivedCount % 100) / 10) + '0';
+	message[3] = (uint8_t)((AM2302_BitsReceivedCount % 1000) / 100) + '0';
+	message[2] = (uint8_t)((AM2302_BitsReceivedCount % 10000) / 1000) + '0';
+	message[1] = (uint8_t)((AM2302_BitsReceivedCount % 100000) / 10000) + '0';
+	message[0] = (uint8_t)((AM2302_BitsReceivedCount % 1000000) / 100000) + '0';
 }
 
 int GetArrowPosition(enum SetTimePositions position)
@@ -247,6 +263,33 @@ void ResetB1PushedTime(void)
 	B1_PushedTime = 0;
 }
 
+void AM2302_SendRequest()
+{
+	AM2302_RequestSent = 1;
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
+	HAL_Delay(1);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
+}
+
+void HAL_TIM_IC_CaptureCallback (TIM_HandleTypeDef *htim)
+{
+	if(htim->Instance == TIM3)
+	{
+		//AM2302_BitsReceivedCount = __HAL_TIM_GET_COUNTER(&htim3);
+		//AM2302_BitsReceivedCount = __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_1);
+		if(AM2302_RequestSent)
+		{
+			AM2302_BitsReceivedCount = 0;
+			AM2302_RequestSent = 0;
+		}
+		else
+		{
+			AM2302_BitsReceivedCount++;
+		}
+		__HAL_TIM_SET_COUNTER(&htim3, 0);
+	}
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -311,6 +354,8 @@ int main(void)
 	HAL_NVIC_EnableIRQ(TIM14_IRQn);
 	HAL_TIM_Base_Start_IT(&htim14);
 	
+	HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
+	
 	while (1)
   {
 		HAL_RTC_WaitForSynchro(&hrtc);
@@ -320,7 +365,7 @@ int main(void)
 		
 		if (sTime.Minutes != prevMinutes || B1_pushed || B1_LastPushedTime > 0)
 		{
-			
+			AM2302_SendRequest();
 			//If button hold for over 2s
 			if (B1_pushed && B1_PushedTime > 20)
 			{
@@ -357,6 +402,10 @@ int main(void)
 					}			
 				}		
 			}
+			else
+			{
+				UpdateAM2302_BitsReceivedCountMessage(buttonMessage);
+			}
 			if(B1_LastPushedTime > 0)
 			{
 				B1_LastPushedTime = 0;
@@ -368,7 +417,7 @@ int main(void)
 		}
 
 				
-		HAL_Delay(500);
+		HAL_Delay(800);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -536,7 +585,7 @@ static void MX_TIM3_Init(void)
   sConfigIC.ICPolarity = TIM_INPUTCHANNELPOLARITY_FALLING;
   sConfigIC.ICSelection = TIM_ICSELECTION_DIRECTTI;
   sConfigIC.ICPrescaler = TIM_ICPSC_DIV1;
-  sConfigIC.ICFilter = 0;
+  sConfigIC.ICFilter = 1;
   if (HAL_TIM_IC_ConfigChannel(&htim3, &sConfigIC, TIM_CHANNEL_1) != HAL_OK)
   {
     Error_Handler();
@@ -597,6 +646,9 @@ static void MX_GPIO_Init(void)
                           |HD44780_D4_Pin|HD44780_D5_Pin|HD44780_D6_Pin|HD44780_D7_Pin 
                           |HD44780_RS_Pin|HD44780_E_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(AM2302_DATA_GPIO_Port, AM2302_DATA_Pin, GPIO_PIN_RESET);
+
   /*Configure GPIO pins : HD44780_D0_Pin HD44780_D1_Pin HD44780_D2_Pin HD44780_D3_Pin 
                            HD44780_D4_Pin HD44780_D5_Pin HD44780_D6_Pin HD44780_D7_Pin 
                            HD44780_RS_Pin HD44780_E_Pin */
@@ -613,6 +665,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : AM2302_DATA_Pin */
+  GPIO_InitStruct.Pin = AM2302_DATA_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(AM2302_DATA_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI0_1_IRQn, 0, 0);
