@@ -73,10 +73,10 @@ void HD44780_GoToSecondLine(void)
 	circular_buf_put(commands_buffer, HD44780_COMMAND_GO_TO_SECOND_LINE);
 }
 
-void HD44780_SendMessage(char message[])
+void HD44780_SendMessage(unsigned char message[])
 {
-	for(int i=0; i<strlen(message); i++) {
-		circular_buf_put(characters_buffer, message[i]);
+	for(int i=0; i<strlen((char*)message); i++) {
+		circular_buf_put(characters_buffer, (uint8_t)message[i]);
 	}
 }
 
@@ -90,10 +90,10 @@ enum BusStates eState = HIGH_STATE;
 
 void HD44780_SetDataFromBufferOnLCDPins(circular_buffer_t *buff)
 {
-	int data = circular_buf_get(buff);	
+	uint8_t data = circular_buf_get(buff);	
 	for (int i=0; i<8; i++) 
 	{
-		int value = (1 & (data >> i));
+		uint8_t value = (1 & (data >> i));
 		HAL_GPIO_WritePin(GPIOC, HD44780_OUTPINS[i], value);
 	}
 }

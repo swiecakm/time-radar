@@ -80,8 +80,8 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim14;
 
 /* USER CODE BEGIN PV */
-char hellomessage[] = "Hello!";
-char mainmessage[] = "Clock v1.0";
+unsigned char hellomessage[] = "Hello!";
+unsigned char mainmessage[] = "Clock v1.0";
 RTC_TimeTypeDef sTime;
 RTC_DateTypeDef sDate;
 int B1_pushed = 0;
@@ -91,6 +91,7 @@ int B1_LastPushedTime = 0;
 int AM2302_BitsReceivedCount = 0;
 int AM2302_RequestSent = 0;
 int AM2302_BitsReceived[40];
+uint64_t AM2302_ReceivedData;
 
 /* USER CODE END PV */
 
@@ -111,9 +112,9 @@ void IncrementHours(void);
 void IncrementYear(void);
 void IncrementMonth(void);
 void IncrementDay(void);
-void UpdateAM2302_BitsReceivedCountMessage(char*);
+void UpdateTemperatureMessage(unsigned char*);
 void AM2302_SendRequest();
-
+int refreshDecim = 0;
 	
 /* USER CODE END PFP */
 
@@ -141,14 +142,15 @@ void UpdateDateTimeMessage(RTC_TimeTypeDef *sTime, RTC_DateTypeDef *sDate, char 
 	timeMessage[15] = (uint8_t)(0xF &  sTime->Minutes) + '0';
 }
 
-void UpdateAM2302_BitsReceivedCountMessage(char *message)
+void UpdateTemperatureMessage(unsigned char *message)
 {
-	message[5] = (uint8_t)(AM2302_BitsReceivedCount % 10) + '0';
-	message[4] = (uint8_t)((AM2302_BitsReceivedCount % 100) / 10) + '0';
-	message[3] = (uint8_t)((AM2302_BitsReceivedCount % 1000) / 100) + '0';
-	message[2] = (uint8_t)((AM2302_BitsReceivedCount % 10000) / 1000) + '0';
-	message[1] = (uint8_t)((AM2302_BitsReceivedCount % 100000) / 10000) + '0';
-	message[0] = (uint8_t)((AM2302_BitsReceivedCount % 1000000) / 100000) + '0';
+	uint16_t temperature = 0xFFFF & (AM2302_ReceivedData >> 8);
+	message[5] = 'C';
+	message[4] = (uint8_t)223;
+	message[3] = (uint8_t)(temperature % 10) + '0';
+	message[2] = ',';
+	message[1] = (uint8_t)((temperature % 100) / 10) + '0';
+	message[0] = (uint8_t)((temperature % 1000) / 100) + '0';
 }
 
 int GetArrowPosition(enum SetTimePositions position)
@@ -265,6 +267,7 @@ void ResetB1PushedTime(void)
 
 void AM2302_SendRequest()
 {
+	AM2302_ReceivedData = 0;
 	AM2302_RequestSent = 1;
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
 	HAL_Delay(1);
@@ -275,8 +278,7 @@ void HAL_TIM_IC_CaptureCallback (TIM_HandleTypeDef *htim)
 {
 	if(htim->Instance == TIM3)
 	{
-		//AM2302_BitsReceivedCount = __HAL_TIM_GET_COUNTER(&htim3);
-		//AM2302_BitsReceivedCount = __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_1);
+		int signalLength = __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_1);
 		if(AM2302_RequestSent)
 		{
 			AM2302_BitsReceivedCount = 0;
@@ -285,6 +287,23 @@ void HAL_TIM_IC_CaptureCallback (TIM_HandleTypeDef *htim)
 		else
 		{
 			AM2302_BitsReceivedCount++;
+			//first two falling edges is from initialization of transmission
+			if (AM2302_BitsReceivedCount > 2 && AM2302_BitsReceivedCount <= 42)
+			{
+				uint8_t bitValue;
+				if(signalLength < 100)
+				{
+					bitValue = 0;
+				}
+				else
+				{
+					bitValue = 1;
+				}
+				//higher bit first
+				uint8_t bitPosition = 42 - AM2302_BitsReceivedCount;
+				uint64_t mask = 1 << bitPosition; 
+				AM2302_ReceivedData = (AM2302_ReceivedData & ~mask) | ((bitValue << bitPosition) & mask); 
+			}
 		}
 		__HAL_TIM_SET_COUNTER(&htim3, 0);
 	}
@@ -346,8 +365,8 @@ int main(void)
 	HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
 	
 	uint8_t prevMinutes = -1;
-	char timeMessage[] = "  .  .       :  ";
-	char buttonMessage[] = "                ";
+	unsigned char timeMessage[] = "  .  .       :  ";
+	unsigned char buttonMessage[] = "                ";
 	
 	enum SetTimePositions currentPosition = NONE;
 	
@@ -363,9 +382,18 @@ int main(void)
 		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
 		int arrowPosition = -1;
 		
-		if (sTime.Minutes != prevMinutes || B1_pushed || B1_LastPushedTime > 0)
+		if (1)//(sTime.Minutes != prevMinutes || B1_pushed || B1_LastPushedTime > 0)
 		{
-			AM2302_SendRequest();
+			if(refreshDecim == 3)
+			{
+				refreshDecim = 0;
+				AM2302_SendRequest();
+			}
+			else
+			{
+				refreshDecim ++;
+			}
+			
 			//If button hold for over 2s
 			if (B1_pushed && B1_PushedTime > 20)
 			{
@@ -404,7 +432,7 @@ int main(void)
 			}
 			else
 			{
-				UpdateAM2302_BitsReceivedCountMessage(buttonMessage);
+				UpdateTemperatureMessage(buttonMessage);
 			}
 			if(B1_LastPushedTime > 0)
 			{

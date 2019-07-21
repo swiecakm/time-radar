@@ -4,7 +4,7 @@ void HD44780_Initialize(void);
 	
 void HD44780_InitializeTimer(void);
 
-void HD44780_SendMessage(char[]);
+void HD44780_SendMessage(unsigned char[]);
 
 void HD44780_Clear(void);
 
