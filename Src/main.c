@@ -114,7 +114,6 @@ void IncrementMonth(void);
 void IncrementDay(void);
 void UpdateTemperatureMessage(unsigned char*);
 void AM2302_SendRequest();
-int refreshDecim = 0;
 	
 /* USER CODE END PFP */
 
@@ -151,6 +150,47 @@ void UpdateTemperatureMessage(unsigned char *message)
 	message[2] = ',';
 	message[1] = (uint8_t)((temperature % 100) / 10) + '0';
 	message[0] = (uint8_t)((temperature % 1000) / 100) + '0';
+	
+	uint16_t humidity = 0xFFFF & (AM2302_ReceivedData >> 24);
+	message[15] = '%';
+	message[14] = (uint8_t)(humidity % 10) + '0';
+	message[13] = ',';
+	message[12] = (uint8_t)((humidity % 100) / 10) + '0';
+	message[11] = (uint8_t)((humidity % 1000) / 100) + '0';
+	if ((uint8_t)((humidity % 10000) / 1000) == 0)
+	{
+		message[10] = ' ';
+	}
+	else
+	{
+		message[10] = (uint8_t)((humidity % 10000) / 1000) + '0';
+	}
+	
+	if ((uint8_t)((humidity % 100000) / 10000) == 0)
+	{
+		message[9] = ' ';
+	}
+	else
+	{
+		message[9] = (uint8_t)((humidity % 100000) / 10000) + '0';
+	}
+	
+	uint16_t checksum = 0xFF & AM2302_ReceivedData;
+	uint16_t calculatedchecksum = 0xFF &(
+			(0xFF & (uint16_t)humidity) + 
+			(0xFF & ((uint16_t)humidity >> 8)) + 
+			(0xFF & (uint16_t)temperature) + 
+			(0xFF & ((uint16_t)temperature >> 8))
+	);
+	
+	if(checksum == calculatedchecksum)
+	{
+		message[7] = 'V';
+	}
+	else
+	{
+		message[7] = 'X';
+	}
 }
 
 int GetArrowPosition(enum SetTimePositions position)
@@ -382,17 +422,9 @@ int main(void)
 		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
 		int arrowPosition = -1;
 		
-		if (1)//(sTime.Minutes != prevMinutes || B1_pushed || B1_LastPushedTime > 0)
+		if (sTime.Minutes != prevMinutes || B1_pushed || B1_LastPushedTime > 0)
 		{
-			if(refreshDecim == 3)
-			{
-				refreshDecim = 0;
-				AM2302_SendRequest();
-			}
-			else
-			{
-				refreshDecim ++;
-			}
+			AM2302_SendRequest();
 			
 			//If button hold for over 2s
 			if (B1_pushed && B1_PushedTime > 20)
