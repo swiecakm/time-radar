@@ -167,15 +167,6 @@ void UpdateTemperatureMessage(unsigned char *message)
 	{
 		message[9] = (uint8_t)((humidity % 100000) / 10000) + '0';
 	}
-	
-	if(AM2302_ChecksumCorrect())
-	{
-		message[7] = 'V';
-	}
-	else
-	{
-		message[7] = 'X';
-	}
 }
 
 int GetArrowPosition(enum SetTimePositions position)
