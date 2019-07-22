@@ -47,6 +47,7 @@
 /* USER CODE BEGIN Includes */
 #include "stm32f0xx_hd44780.h"
 #include "rtc.h"
+#include "stdlib.h"
 
 /* USER CODE END Includes */
 
@@ -104,7 +105,7 @@ static void MX_TIM14_Init(void);
 static void MX_TIM3_Init(void);
 /* USER CODE BEGIN PFP */
 
-void UpdateDateTimeMessage(RTC_TimeTypeDef*, RTC_DateTypeDef*, char*);
+void UpdateDateTimeMessage(RTC_TimeTypeDef*, RTC_DateTypeDef*, unsigned char*);
 int GetArrowPosition(enum SetTimePositions);
 void IncrementDateTime(enum SetTimePositions position);
 void UpdateTemperatureMessage(unsigned char*);
@@ -115,7 +116,7 @@ void AM2302_SendRequest();
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void UpdateDateTimeMessage(RTC_TimeTypeDef *sTime, RTC_DateTypeDef *sDate, char *timeMessage)
+void UpdateDateTimeMessage(RTC_TimeTypeDef *sTime, RTC_DateTypeDef *sDate, unsigned char *timeMessage)
 {
 	timeMessage[0] = (uint8_t)(0xF & (sDate->Date >> 4)) + '0';
 	timeMessage[1] = (uint8_t)(0xF & sDate->Date) + '0';
@@ -393,7 +394,7 @@ int main(void)
 				}
 				arrowPosition = GetArrowPosition(currentPosition); 
 
-				for (int i=0; i<strlen(buttonMessage); i++)
+				for (int i=0; i<strlen((const char*)buttonMessage); i++)
 				{
 					if (i != arrowPosition)
 					{
