@@ -432,6 +432,16 @@
               <FileType>5</FileType>
               <FilePath>../Inc/rtc.h</FilePath>
             </File>
+            <File>
+              <FileName>AM2302.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>../Src/AM2302.c</FilePath>
+            </File>
+            <File>
+              <FileName>AM2302.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>../Inc/AM2302.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

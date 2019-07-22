@@ -48,6 +48,7 @@
 #include "stm32f0xx_hd44780.h"
 #include "rtc.h"
 #include "stdlib.h"
+#include "AM2302.h"
 
 /* USER CODE END Includes */
 
@@ -90,10 +91,7 @@ int B1_pushed = 0;
 int B1_PushedTime = 0;
 int B1_LastPushedTime = 0;
 //temperature and humidity sensor variables
-int AM2302_BitsReceivedCount = 0;
-int AM2302_RequestSent = 0;
-int AM2302_BitsReceived[40];
-uint64_t AM2302_ReceivedData;
+
 
 /* USER CODE END PV */
 
@@ -109,8 +107,7 @@ void UpdateDateTimeMessage(RTC_TimeTypeDef*, RTC_DateTypeDef*, unsigned char*);
 int GetArrowPosition(enum SetTimePositions);
 void IncrementDateTime(enum SetTimePositions position);
 void UpdateTemperatureMessage(unsigned char*);
-void AM2302_SendRequest();
-	
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -139,7 +136,7 @@ void UpdateDateTimeMessage(RTC_TimeTypeDef *sTime, RTC_DateTypeDef *sDate, unsig
 
 void UpdateTemperatureMessage(unsigned char *message)
 {
-	uint16_t temperature = 0xFFFF & (AM2302_ReceivedData >> 8);
+	uint16_t temperature = AM2302_GetTemperature();
 	message[5] = 'C';
 	message[4] = (uint8_t)223;
 	message[3] = (uint8_t)(temperature % 10) + '0';
@@ -147,7 +144,7 @@ void UpdateTemperatureMessage(unsigned char *message)
 	message[1] = (uint8_t)((temperature % 100) / 10) + '0';
 	message[0] = (uint8_t)((temperature % 1000) / 100) + '0';
 	
-	uint16_t humidity = 0xFFFF & (AM2302_ReceivedData >> 24);
+	uint16_t humidity = AM2302_GetHumidity();
 	message[15] = '%';
 	message[14] = (uint8_t)(humidity % 10) + '0';
 	message[13] = ',';
@@ -171,15 +168,7 @@ void UpdateTemperatureMessage(unsigned char *message)
 		message[9] = (uint8_t)((humidity % 100000) / 10000) + '0';
 	}
 	
-	uint16_t checksum = 0xFF & AM2302_ReceivedData;
-	uint16_t calculatedchecksum = 0xFF &(
-			(0xFF & (uint16_t)humidity) + 
-			(0xFF & ((uint16_t)humidity >> 8)) + 
-			(0xFF & (uint16_t)temperature) + 
-			(0xFF & ((uint16_t)temperature >> 8))
-	);
-	
-	if(checksum == calculatedchecksum)
+	if(AM2302_ChecksumCorrect())
 	{
 		message[7] = 'V';
 	}
@@ -252,50 +241,6 @@ void ResetB1PushedTime(void)
 		B1_LastPushedTime = B1_PushedTime;
 	}
 	B1_PushedTime = 0;
-}
-
-void AM2302_SendRequest()
-{
-	AM2302_ReceivedData = 0;
-	AM2302_RequestSent = 1;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
-	HAL_Delay(1);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
-}
-
-void HAL_TIM_IC_CaptureCallback (TIM_HandleTypeDef *htim)
-{
-	if(htim->Instance == TIM3)
-	{
-		int signalLength = __HAL_TIM_GET_COMPARE(&htim3, TIM_CHANNEL_1);
-		if(AM2302_RequestSent)
-		{
-			AM2302_BitsReceivedCount = 0;
-			AM2302_RequestSent = 0;
-		}
-		else
-		{
-			AM2302_BitsReceivedCount++;
-			//first two falling edges is from initialization of transmission
-			if (AM2302_BitsReceivedCount > 2 && AM2302_BitsReceivedCount <= 42)
-			{
-				uint8_t bitValue;
-				if(signalLength < 90)
-				{
-					bitValue = 0;
-				}
-				else
-				{
-					bitValue = 1;
-				}
-				//higher bit first
-				uint8_t bitPosition = 42 - AM2302_BitsReceivedCount;
-				uint64_t mask = 1 << bitPosition; 
-				AM2302_ReceivedData = (AM2302_ReceivedData & ~mask) | ((bitValue << bitPosition) & mask); 
-			}
-		}
-		__HAL_TIM_SET_COUNTER(&htim3, 0);
-	}
 }
 
 /* USER CODE END 0 */
