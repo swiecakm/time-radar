@@ -46,6 +46,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stm32f0xx_hd44780.h"
+#include "rtc.h"
 
 /* USER CODE END Includes */
 
@@ -106,12 +107,6 @@ static void MX_TIM3_Init(void);
 void UpdateDateTimeMessage(RTC_TimeTypeDef*, RTC_DateTypeDef*, char*);
 int GetArrowPosition(enum SetTimePositions);
 void IncrementDateTime(enum SetTimePositions position);
-uint8_t IncrementBDCValue(uint8_t, uint8_t);
-void IncrementMinutes(void);
-void IncrementHours(void);
-void IncrementYear(void);
-void IncrementMonth(void);
-void IncrementDay(void);
 void UpdateTemperatureMessage(unsigned char*);
 void AM2302_SendRequest();
 	
@@ -219,65 +214,18 @@ void IncrementDateTime(enum SetTimePositions position)
 		switch (position)
 		{
 			case MINUTES:
-				IncrementMinutes(); break;
+				IncrementMinutes(&hrtc, &sTime); break;
 			case HOURS:
-				IncrementHours(); break;
+				IncrementHours(&hrtc, &sTime); break;
 			case YEAR:
-				IncrementYear(); break;
+				IncrementYear(&hrtc, &sDate); break;
 			case MONTH:
-				IncrementMonth(); break;
+				IncrementMonth(&hrtc, &sDate); break;
 			case DAY:
-				IncrementDay(); break;
+				IncrementDay(&hrtc, &sDate); break;
 			default:
 				break;
 		}
-}
-
-//only for numbers < 100
-uint8_t IncrementBDCValue(uint8_t value, uint8_t max)
-{
-	value = value + 1;
-	//repair invalid bcd state
-	if ((0xF & value) > 9)
-	{
-		//ommit all invalid states 10 - 15
-		value = value + 6;
-	}
-	if (value > max)
-	{
-		value = 0x0;
-	}
-	return value;
-}
-
-void IncrementMinutes(void)
-{
-	sTime.Minutes = IncrementBDCValue(sTime.Minutes, 0x60);
-	HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
-}
-
-void IncrementHours(void)
-{
-	sTime.Hours = IncrementBDCValue(sTime.Hours, 0x24);
-	HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
-}
-
-void IncrementYear(void)
-{
-	sDate.Year = IncrementBDCValue(sDate.Year, 0x99);
-	HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
-}
-
-void IncrementMonth(void)
-{
-	sDate.Month = IncrementBDCValue(sDate.Month, 0x12);
-	HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
-}
-
-void IncrementDay(void)
-{
-	sDate.Date = IncrementBDCValue(sDate.Date, 0x31);
-	HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
 }
 
 void SetButtonPushed(void)
@@ -331,7 +279,7 @@ void HAL_TIM_IC_CaptureCallback (TIM_HandleTypeDef *htim)
 			if (AM2302_BitsReceivedCount > 2 && AM2302_BitsReceivedCount <= 42)
 			{
 				uint8_t bitValue;
-				if(signalLength < 100)
+				if(signalLength < 90)
 				{
 					bitValue = 0;
 				}
@@ -417,9 +365,7 @@ int main(void)
 	
 	while (1)
   {
-		HAL_RTC_WaitForSynchro(&hrtc);
-		HAL_RTC_GetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
-		HAL_RTC_GetDate(&hrtc, &sDate, RTC_FORMAT_BCD);
+		UpdateDateTime(&hrtc, &sDate, &sTime);
 		int arrowPosition = -1;
 		
 		if (sTime.Minutes != prevMinutes || B1_pushed || B1_LastPushedTime > 0)
