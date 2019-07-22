@@ -3,11 +3,11 @@
 
 #include "stm32f0xx_hal.h"
 
-void IncrementMinutes(RTC_HandleTypeDef*, RTC_TimeTypeDef*);
-void IncrementHours(RTC_HandleTypeDef*, RTC_TimeTypeDef*);
-void IncrementYear(RTC_HandleTypeDef*, RTC_DateTypeDef*);
-void IncrementMonth(RTC_HandleTypeDef*, RTC_DateTypeDef*);
-void IncrementDay(RTC_HandleTypeDef*, RTC_DateTypeDef*);
-void UpdateDateTime(RTC_HandleTypeDef*, RTC_DateTypeDef*, RTC_TimeTypeDef*);
+void RTC_IncrementMinutes(RTC_HandleTypeDef*, RTC_TimeTypeDef*);
+void RTC_IncrementHours(RTC_HandleTypeDef*, RTC_TimeTypeDef*);
+void RTC_IncrementYear(RTC_HandleTypeDef*, RTC_DateTypeDef*);
+void RTC_IncrementMonth(RTC_HandleTypeDef*, RTC_DateTypeDef*);
+void RTC_IncrementDay(RTC_HandleTypeDef*, RTC_DateTypeDef*);
+void RTC_RefreshDateTime(RTC_HandleTypeDef*, RTC_DateTypeDef*, RTC_TimeTypeDef*);
 
 #endif

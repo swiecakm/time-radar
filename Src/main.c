@@ -214,15 +214,15 @@ void IncrementDateTime(enum SetTimePositions position)
 		switch (position)
 		{
 			case MINUTES:
-				IncrementMinutes(&hrtc, &sTime); break;
+				RTC_IncrementMinutes(&hrtc, &sTime); break;
 			case HOURS:
-				IncrementHours(&hrtc, &sTime); break;
+				RTC_IncrementHours(&hrtc, &sTime); break;
 			case YEAR:
-				IncrementYear(&hrtc, &sDate); break;
+				RTC_IncrementYear(&hrtc, &sDate); break;
 			case MONTH:
-				IncrementMonth(&hrtc, &sDate); break;
+				RTC_IncrementMonth(&hrtc, &sDate); break;
 			case DAY:
-				IncrementDay(&hrtc, &sDate); break;
+				RTC_IncrementDay(&hrtc, &sDate); break;
 			default:
 				break;
 		}
@@ -365,7 +365,7 @@ int main(void)
 	
 	while (1)
   {
-		UpdateDateTime(&hrtc, &sDate, &sTime);
+		RTC_RefreshDateTime(&hrtc, &sDate, &sTime);
 		int arrowPosition = -1;
 		
 		if (sTime.Minutes != prevMinutes || B1_pushed || B1_LastPushedTime > 0)
