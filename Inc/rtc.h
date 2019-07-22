@@ -9,5 +9,6 @@ void RTC_IncrementYear(RTC_HandleTypeDef*, RTC_DateTypeDef*);
 void RTC_IncrementMonth(RTC_HandleTypeDef*, RTC_DateTypeDef*);
 void RTC_IncrementDay(RTC_HandleTypeDef*, RTC_DateTypeDef*);
 void RTC_RefreshDateTime(RTC_HandleTypeDef*, RTC_DateTypeDef*, RTC_TimeTypeDef*);
+void RTC_SetDefaultTime(RTC_HandleTypeDef *, RTC_TimeTypeDef *);
 
 #endif

@@ -347,10 +347,7 @@ int main(void)
 	HAL_Delay(2000);
 	HD44780_GoToFirstLine();
 	
-	sTime.Hours = (2<<4) + 2;
-  sTime.Minutes = 0; 
-  sTime.Seconds = 2;
-	HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD);
+	RTC_SetDefaultTime(&hrtc, &sTime);
 	
 	uint8_t prevMinutes = -1;
 	unsigned char timeMessage[] = "  .  .       :  ";

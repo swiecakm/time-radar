@@ -56,3 +56,11 @@ void RTC_RefreshDateTime(RTC_HandleTypeDef *hrtc, RTC_DateTypeDef *sDate, RTC_Ti
 	HAL_RTC_GetTime(hrtc, sTime, RTC_FORMAT_BCD);
 	HAL_RTC_GetDate(hrtc, sDate, RTC_FORMAT_BCD);
 }
+
+void RTC_SetDefaultTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime)
+{
+	sTime->Hours = (2<<4) + 2;
+  sTime->Minutes = (2<<4) + 2;; 
+  sTime->Seconds = 0;
+	HAL_RTC_SetTime(hrtc, sTime, RTC_FORMAT_BCD);
+}
