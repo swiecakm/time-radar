@@ -1,6 +1,15 @@
 #include "rtc.h"
 #include "stm32f0xx_hal.h"
 
+#define DS1307_DEVICE_ADDRESS (0x68 << 1)
+#define DS1307_SECONDS_ADDRESS 0x00
+#define DS1307_MINUTES_ADDRESS 0x01
+#define DS1307_HOURS_ADDRESS 0x02
+#define DS1307_DAY_ADDRESS 0x03
+#define DS1307_DATE_ADDRESS 0x04
+#define DS1307_MONTH_ADDRESS 0x05
+#define DS1307_YEAR_ADDRESS 0x06
+
 uint8_t RTC_IncrementBDCValue(uint8_t, uint8_t);
 
 //only for numbers < 100
