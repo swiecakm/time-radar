@@ -40,6 +40,7 @@ RTC_DateTime_t * RTC_InitializeDateTime(I2C_HandleTypeDef *hi2c)
 void RTC_IncrementMinutes(I2C_HandleTypeDef *hi2c)
 {
 	uint8_t value = 0x00;
+	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_SECONDS_ADDRESS, 1, &value, 1, 100);
 	HAL_I2C_Mem_Read(hi2c, DS1307_DEVICE_ADDRESS, DS1307_MINUTES_ADDRESS, 1, &value, 1, 100);
 	value = RTC_IncrementBDCValue(value, 0x60);
 	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_MINUTES_ADDRESS, 1, &value, 1, 100);
