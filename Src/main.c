@@ -49,6 +49,7 @@
 #include "rtc.h"
 #include "stdlib.h"
 #include "AM2302.h"
+#include "rtc.h"
 
 /* USER CODE END Includes */
 
@@ -87,8 +88,11 @@ TIM_HandleTypeDef htim14;
 /* USER CODE BEGIN PV */
 unsigned char hellomessage[] = "Hello!";
 unsigned char mainmessage[] = "Clock v1.0";
-RTC_TimeTypeDef sTime;
-RTC_DateTypeDef sDate;
+//RTC_TimeTypeDef sTime;
+//RTC_DateTypeDef sDate;
+
+RTC_DateTime_t *dateTime;
+
 int B1_pushed = 0;
 int B1_PushedTime = 0;
 int B1_LastPushedTime = 0;
@@ -106,7 +110,7 @@ static void MX_TIM3_Init(void);
 static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
 
-void UpdateDateTimeMessage(RTC_TimeTypeDef*, RTC_DateTypeDef*, unsigned char*);
+void UpdateDateTimeMessage(RTC_DateTime_t *, unsigned char*);
 int GetArrowPosition(enum SetTimePositions);
 void IncrementDateTime(enum SetTimePositions position);
 void UpdateTemperatureMessage(unsigned char*);
@@ -116,25 +120,25 @@ void UpdateTemperatureMessage(unsigned char*);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void UpdateDateTimeMessage(RTC_TimeTypeDef *sTime, RTC_DateTypeDef *sDate, unsigned char *timeMessage)
+void UpdateDateTimeMessage(RTC_DateTime_t *dateTime, unsigned char *timeMessage)
 {
-	timeMessage[0] = (uint8_t)(0xF & (sDate->Date >> 4)) + '0';
-	timeMessage[1] = (uint8_t)(0xF & sDate->Date) + '0';
+	timeMessage[0] = (uint8_t)(0xF & (dateTime->Date >> 4)) + '0';
+	timeMessage[1] = (uint8_t)(0xF & dateTime->Date) + '0';
 	
-	timeMessage[3] = (uint8_t)(0xF & (sDate->Month >> 4)) + '0';
-	timeMessage[4] = (uint8_t)(0xF & sDate->Month) + '0';
+	timeMessage[3] = (uint8_t)(0xF & (dateTime->Month >> 4)) + '0';
+	timeMessage[4] = (uint8_t)(0xF & dateTime->Month) + '0';
 	
 	timeMessage[6] = '2';
 	timeMessage[7] = '0';
 	
-	timeMessage[8] = (uint8_t)(0xF & (sDate->Year >> 4)) + '0';
-	timeMessage[9] = (uint8_t)(0xF & sDate->Year) + '0';
+	timeMessage[8] = (uint8_t)(0xF & (dateTime->Year >> 4)) + '0';
+	timeMessage[9] = (uint8_t)(0xF & dateTime->Year) + '0';
 	
-	timeMessage[11] = (uint8_t)(0xF & (sTime->Hours >> 4)) + '0';
-	timeMessage[12] = (uint8_t)(0xF &  sTime->Hours) + '0';
+	timeMessage[11] = (uint8_t)(0xF & (dateTime->Hours >> 4)) + '0';
+	timeMessage[12] = (uint8_t)(0xF &  dateTime->Hours) + '0';
 	
-	timeMessage[14] = (uint8_t)(0xF & (sTime->Minutes >> 4)) + '0';
-	timeMessage[15] = (uint8_t)(0xF &  sTime->Minutes) + '0';
+	timeMessage[14] = (uint8_t)(0xF & (dateTime->Minutes >> 4)) + '0';
+	timeMessage[15] = (uint8_t)(0xF &  dateTime->Minutes) + '0';
 }
 
 void UpdateTemperatureMessage(unsigned char *message)
@@ -198,15 +202,15 @@ void IncrementDateTime(enum SetTimePositions position)
 		switch (position)
 		{
 			case MINUTES:
-				RTC_IncrementMinutes(&hrtc, &sTime); break;
+				RTC_IncrementMinutes(&hi2c1); break;
 			case HOURS:
-				RTC_IncrementHours(&hrtc, &sTime); break;
+				RTC_IncrementHours(&hi2c1); break;
 			case YEAR:
-				RTC_IncrementYear(&hrtc, &sDate); break;
+				RTC_IncrementYear(&hi2c1); break;
 			case MONTH:
-				RTC_IncrementMonth(&hrtc, &sDate); break;
+				RTC_IncrementMonth(&hi2c1); break;
 			case DAY:
-				RTC_IncrementDay(&hrtc, &sDate); break;
+				RTC_IncrementDate(&hi2c1); break;
 			default:
 				break;
 		}
@@ -287,9 +291,7 @@ int main(void)
 	HD44780_SendMessage(mainmessage);
 	HAL_Delay(2000);
 	HD44780_GoToFirstLine();
-	
-	RTC_SetDefaultTime(&hrtc, &sTime);
-	
+		
 	uint8_t prevMinutes = -1;
 	unsigned char timeMessage[] = "  .  .       :  ";
 	unsigned char buttonMessage[] = "                ";
@@ -301,12 +303,13 @@ int main(void)
 	
 	HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
 	
+	dateTime =  RTC_InitializeDateTime(&hi2c1);
 	while (1)
   {
-		RTC_RefreshDateTime(&hrtc, &sDate, &sTime);
+		RTC_RefreshDateTime(&hi2c1, dateTime);
 		int arrowPosition = -1;
 		
-		if (sTime.Minutes != prevMinutes || B1_pushed || B1_LastPushedTime > 0)
+		if (dateTime->Minutes != prevMinutes || B1_pushed || B1_LastPushedTime > 0)
 		{
 			AM2302_SendRequest();
 			
@@ -314,9 +317,10 @@ int main(void)
 			if (B1_pushed && B1_PushedTime > 20)
 			{
 				IncrementDateTime(currentPosition);
+				RTC_RefreshDateTime(&hi2c1, dateTime);
 			}
-			prevMinutes = sTime.Minutes;
-			UpdateDateTimeMessage(&sTime, &sDate, timeMessage);			
+			prevMinutes = dateTime->Minutes;
+			UpdateDateTimeMessage(dateTime, timeMessage);			
 			HD44780_Clear();
 			HD44780_SendMessage(timeMessage);
 			HAL_Delay(100);

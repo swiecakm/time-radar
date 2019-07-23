@@ -1,5 +1,6 @@
 #include "rtc.h"
 #include "stm32f0xx_hal.h"
+#include "stdlib.h"
 
 #define DS1307_DEVICE_ADDRESS (0x68 << 1)
 #define DS1307_SECONDS_ADDRESS 0x00
@@ -29,47 +30,73 @@ uint8_t RTC_IncrementBDCValue(uint8_t value, uint8_t max)
 	return value;
 }
 
-void RTC_IncrementMinutes(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime)
+RTC_DateTime_t * RTC_InitializeDateTime(I2C_HandleTypeDef *hi2c)
 {
-	sTime->Minutes = RTC_IncrementBDCValue(sTime->Minutes, 0x60);
-	HAL_RTC_SetTime(hrtc, sTime, RTC_FORMAT_BCD);
+	RTC_DateTime_t *dateTime = (RTC_DateTime_t *) malloc(sizeof(RTC_DateTime_t));
+	RTC_RefreshDateTime(hi2c, dateTime);
+	return dateTime;
 }
 
-void RTC_IncrementHours(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime)
+void RTC_IncrementMinutes(I2C_HandleTypeDef *hi2c)
 {
-	sTime->Hours = RTC_IncrementBDCValue(sTime->Hours, 0x24);
-	HAL_RTC_SetTime(hrtc, sTime, RTC_FORMAT_BCD);
+	uint8_t value = 0x00;
+	HAL_I2C_Mem_Read(hi2c, DS1307_DEVICE_ADDRESS, DS1307_MINUTES_ADDRESS, 1, &value, 1, 100);
+	value = RTC_IncrementBDCValue(value, 0x60);
+	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_MINUTES_ADDRESS, 1, &value, 1, 100);
 }
 
-void RTC_IncrementYear(RTC_HandleTypeDef *hrtc, RTC_DateTypeDef *sDate)
+void RTC_IncrementHours(I2C_HandleTypeDef *hi2c)
 {
-	sDate->Year = RTC_IncrementBDCValue(sDate->Year, 0x99);
-	HAL_RTC_SetDate(hrtc, sDate, RTC_FORMAT_BCD);
+	uint8_t value = 0x00;
+	HAL_I2C_Mem_Read(hi2c, DS1307_DEVICE_ADDRESS, DS1307_HOURS_ADDRESS, 1, &value, 1, 100);
+	value = RTC_IncrementBDCValue(value, 0x24);
+	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_HOURS_ADDRESS, 1, &value, 1, 100);
 }
 
-void RTC_IncrementMonth(RTC_HandleTypeDef *hrtc, RTC_DateTypeDef *sDate)
+void RTC_IncrementYear(I2C_HandleTypeDef *hi2c)
 {
-	sDate->Month = RTC_IncrementBDCValue(sDate->Month, 0x12);
-	HAL_RTC_SetDate(hrtc, sDate, RTC_FORMAT_BCD);
+	uint8_t value = 0x00;
+	HAL_I2C_Mem_Read(hi2c, DS1307_DEVICE_ADDRESS, DS1307_YEAR_ADDRESS, 1, &value, 1, 100);
+	value = RTC_IncrementBDCValue(value, 0x99);
+	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_YEAR_ADDRESS, 1, &value, 1, 100);
 }
 
-void RTC_IncrementDay(RTC_HandleTypeDef *hrtc, RTC_DateTypeDef *sDate)
+void RTC_IncrementMonth(I2C_HandleTypeDef *hi2c)
 {
-	sDate->Date = RTC_IncrementBDCValue(sDate->Date, 0x31);
-	HAL_RTC_SetDate(hrtc, sDate, RTC_FORMAT_BCD);
+	uint8_t value = 0x00;
+	HAL_I2C_Mem_Read(hi2c, DS1307_DEVICE_ADDRESS, DS1307_MONTH_ADDRESS, 1, &value, 1, 100);
+	value = RTC_IncrementBDCValue(value, 0x12);
+	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_MONTH_ADDRESS, 1, &value, 1, 100);
 }
 
-void RTC_RefreshDateTime(RTC_HandleTypeDef *hrtc, RTC_DateTypeDef *sDate, RTC_TimeTypeDef *sTime)
+void RTC_IncrementDate(I2C_HandleTypeDef *hi2c)
 {
-	HAL_RTC_WaitForSynchro(hrtc);
-	HAL_RTC_GetTime(hrtc, sTime, RTC_FORMAT_BCD);
-	HAL_RTC_GetDate(hrtc, sDate, RTC_FORMAT_BCD);
+	uint8_t value = 0x00;
+	HAL_I2C_Mem_Read(hi2c, DS1307_DEVICE_ADDRESS, DS1307_DATE_ADDRESS, 1, &value, 1, 100);
+	value = RTC_IncrementBDCValue(value, 0x31);
+	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_DATE_ADDRESS, 1, &value, 1, 100);
 }
 
-void RTC_SetDefaultTime(RTC_HandleTypeDef *hrtc, RTC_TimeTypeDef *sTime)
+void RTC_RefreshDateTime(I2C_HandleTypeDef *hi2c, RTC_DateTime_t *dateTime)
 {
-	sTime->Hours = (2<<4) + 2;
-  sTime->Minutes = (2<<4) + 2;; 
-  sTime->Seconds = 0;
-	HAL_RTC_SetTime(hrtc, sTime, RTC_FORMAT_BCD);
+	HAL_I2C_Mem_Read(hi2c, DS1307_DEVICE_ADDRESS, DS1307_SECONDS_ADDRESS, 1, &dateTime->Seconds, 1, 100);
+	HAL_I2C_Mem_Read(hi2c, DS1307_DEVICE_ADDRESS, DS1307_MINUTES_ADDRESS, 1, &dateTime->Minutes, 1, 100);
+	HAL_I2C_Mem_Read(hi2c, DS1307_DEVICE_ADDRESS, DS1307_HOURS_ADDRESS, 1, &dateTime->Hours, 1, 100);
+	HAL_I2C_Mem_Read(hi2c, DS1307_DEVICE_ADDRESS, DS1307_DAY_ADDRESS, 1, &dateTime->Day, 1, 100);
+	HAL_I2C_Mem_Read(hi2c, DS1307_DEVICE_ADDRESS, DS1307_DATE_ADDRESS, 1, &dateTime->Date, 1, 100);
+	HAL_I2C_Mem_Read(hi2c, DS1307_DEVICE_ADDRESS, DS1307_MONTH_ADDRESS, 1, &dateTime->Month, 1, 100);
+	HAL_I2C_Mem_Read(hi2c, DS1307_DEVICE_ADDRESS, DS1307_YEAR_ADDRESS, 1, &dateTime->Year, 1, 100);
+}
+
+void RTC_SetDefaultTime(I2C_HandleTypeDef *hi2c)
+{
+	uint8_t zeroVal = 0x00, oneVal = 0x01, yearVal = 0x19;
+	
+	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_SECONDS_ADDRESS, 1, &zeroVal, 1, 100);
+	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_MINUTES_ADDRESS, 1, &oneVal, 1, 100);
+	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_HOURS_ADDRESS, 1, &zeroVal, 1, 100);
+	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_DAY_ADDRESS, 1, &oneVal, 1, 100);
+	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_DATE_ADDRESS, 1, &oneVal, 1, 100);
+	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_MONTH_ADDRESS, 1, &oneVal, 1, 100);
+	HAL_I2C_Mem_Write(hi2c, DS1307_DEVICE_ADDRESS, DS1307_YEAR_ADDRESS, 1, &yearVal, 1, 100);
 }
