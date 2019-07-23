@@ -344,7 +344,7 @@ int main(void)
 					}			
 				}		
 			}
-			else
+			else if (currentPosition == NONE)
 			{
 				UpdateTemperatureMessage(buttonMessage);
 			}
