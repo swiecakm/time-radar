@@ -84,8 +84,8 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim14;
 
 /* USER CODE BEGIN PV */
-unsigned char hellomessage[] = "Hello!";
-unsigned char mainmessage[] = "Clock v1.0";
+unsigned char helloMessage[] = "Hello!";
+unsigned char versionMessage[] = "Clock v1.0";
 
 RTC_DateTime_t *dateTime;
 
@@ -115,25 +115,25 @@ void UpdateTemperatureMessage(unsigned char*);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 
-void UpdateDateTimeMessage(RTC_DateTime_t *dateTime, unsigned char *timeMessage)
+void UpdateDateTimeMessage(RTC_DateTime_t *dateTime, unsigned char *dateTimeMessage)
 {
-	timeMessage[0] = (uint8_t)(0xF & (dateTime->Date >> 4)) + '0';
-	timeMessage[1] = (uint8_t)(0xF & dateTime->Date) + '0';
+	dateTimeMessage[0] = (uint8_t)(0xF & (dateTime->Date >> 4)) + '0';
+	dateTimeMessage[1] = (uint8_t)(0xF & dateTime->Date) + '0';
 	
-	timeMessage[3] = (uint8_t)(0xF & (dateTime->Month >> 4)) + '0';
-	timeMessage[4] = (uint8_t)(0xF & dateTime->Month) + '0';
+	dateTimeMessage[3] = (uint8_t)(0xF & (dateTime->Month >> 4)) + '0';
+	dateTimeMessage[4] = (uint8_t)(0xF & dateTime->Month) + '0';
 	
-	timeMessage[6] = '2';
-	timeMessage[7] = '0';
+	dateTimeMessage[6] = '2';
+	dateTimeMessage[7] = '0';
 	
-	timeMessage[8] = (uint8_t)(0xF & (dateTime->Year >> 4)) + '0';
-	timeMessage[9] = (uint8_t)(0xF & dateTime->Year) + '0';
+	dateTimeMessage[8] = (uint8_t)(0xF & (dateTime->Year >> 4)) + '0';
+	dateTimeMessage[9] = (uint8_t)(0xF & dateTime->Year) + '0';
 	
-	timeMessage[11] = (uint8_t)(0xF & (dateTime->Hours >> 4)) + '0';
-	timeMessage[12] = (uint8_t)(0xF &  dateTime->Hours) + '0';
+	dateTimeMessage[11] = (uint8_t)(0xF & (dateTime->Hours >> 4)) + '0';
+	dateTimeMessage[12] = (uint8_t)(0xF &  dateTime->Hours) + '0';
 	
-	timeMessage[14] = (uint8_t)(0xF & (dateTime->Minutes >> 4)) + '0';
-	timeMessage[15] = (uint8_t)(0xF &  dateTime->Minutes) + '0';
+	dateTimeMessage[14] = (uint8_t)(0xF & (dateTime->Minutes >> 4)) + '0';
+	dateTimeMessage[15] = (uint8_t)(0xF &  dateTime->Minutes) + '0';
 }
 
 void UpdateTemperatureMessage(unsigned char *message)
@@ -279,16 +279,16 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-	HD44780_SendMessage(hellomessage);
+	HD44780_SendMessage(helloMessage);
 	HAL_Delay(1000);
 	HD44780_GoToSecondLine();
-	HD44780_SendMessage(mainmessage);
+	HD44780_SendMessage(versionMessage);
 	HAL_Delay(2000);
 	HD44780_GoToFirstLine();
 		
 	uint8_t prevMinutes = -1;
-	unsigned char timeMessage[] = "  .  .       :  ";
-	unsigned char buttonMessage[] = "                ";
+	unsigned char dateTimeMessage[] = "  .  .       :  ";
+	unsigned char secondLineMessage[] = "                ";
 	
 	enum SetTimePositions currentPosition = NONE;
 	
@@ -314,9 +314,9 @@ int main(void)
 				RTC_RefreshDateTime(&hi2c1, dateTime);
 			}
 			prevMinutes = dateTime->Minutes;
-			UpdateDateTimeMessage(dateTime, timeMessage);			
+			UpdateDateTimeMessage(dateTime, dateTimeMessage);			
 			HD44780_Clear();
-			HD44780_SendMessage(timeMessage);
+			HD44780_SendMessage(dateTimeMessage);
 			HAL_Delay(100);
 			HD44780_GoToSecondLine();
 			//0.1s - 1s
@@ -332,28 +332,28 @@ int main(void)
 				}
 				arrowPosition = GetArrowPosition(currentPosition); 
 
-				for (int i=0; i<strlen((const char*)buttonMessage); i++)
+				for (int i=0; i<strlen((const char*)secondLineMessage); i++)
 				{
 					if (i != arrowPosition)
 					{
-						buttonMessage[i] = ' ';
+						secondLineMessage[i] = ' ';
 					}
 					else
 					{
-						buttonMessage[i] = '^';
+						secondLineMessage[i] = '^';
 					}			
 				}		
 			}
 			else if (currentPosition == NONE)
 			{
-				UpdateTemperatureMessage(buttonMessage);
+				UpdateTemperatureMessage(secondLineMessage);
 			}
 			if(B1_LastPushedTime > 0)
 			{
 				B1_LastPushedTime = 0;
 			}
 			
-			HD44780_SendMessage(buttonMessage);
+			HD44780_SendMessage(secondLineMessage);
 			HAL_Delay(100);
 			HD44780_GoToFirstLine();
 		}
