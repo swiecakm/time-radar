@@ -83,6 +83,8 @@ I2C_HandleTypeDef hi2c1;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim14;
 
+UART_HandleTypeDef huart1;
+
 /* USER CODE BEGIN PV */
 unsigned char helloMessage[] = "Hello!";
 unsigned char versionMessage[] = "Clock v1.0";
@@ -92,6 +94,9 @@ RTC_DateTime_t *dateTime;
 int B1_pushed = 0;
 int B1_PushedTime = 0;
 int B1_LastPushedTime = 0;
+
+uint8_t UART_received= 0;
+
 //temperature and humidity sensor variables
 
 
@@ -103,6 +108,7 @@ static void MX_GPIO_Init(void);
 static void MX_TIM14_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_I2C1_Init(void);
+static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 void UpdateDateTimeMessage(RTC_DateTime_t *, unsigned char*);
@@ -236,6 +242,7 @@ void ResetB1PushedTime(void)
 	B1_PushedTime = 0;
 }
 
+
 /* USER CODE END 0 */
 
 /**
@@ -269,6 +276,7 @@ int main(void)
   MX_TIM14_Init();
   MX_TIM3_Init();
   MX_I2C1_Init();
+  MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 	HD44780_Initialize();
 	
@@ -298,6 +306,9 @@ int main(void)
 	HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1);
 	
 	dateTime =  RTC_InitializeDateTime(&hi2c1);
+	
+	HAL_UART_Receive_IT(&huart1, &UART_received, 1);
+		
 	while (1)
   {
 		RTC_RefreshDateTime(&hi2c1, dateTime);
@@ -403,7 +414,8 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_I2C1;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_I2C1;
+  PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK1;
   PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_HSI;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
@@ -543,6 +555,41 @@ static void MX_TIM14_Init(void)
   /* USER CODE BEGIN TIM14_Init 2 */
 
   /* USER CODE END TIM14_Init 2 */
+
+}
+
+/**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 9600;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
 
 }
 

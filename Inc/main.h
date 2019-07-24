@@ -58,6 +58,7 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
 extern TIM_HandleTypeDef htim3;
+extern uint8_t UART_received;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
