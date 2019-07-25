@@ -603,24 +603,35 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOF, HD44780_RS_Pin|HD44780_E_Pin|HD44780_D7_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, HD44780_D0_Pin|HD44780_D1_Pin|HD44780_D2_Pin|HD44780_D3_Pin 
-                          |HD44780_D4_Pin|HD44780_D5_Pin|HD44780_D6_Pin|HD44780_D7_Pin 
-                          |HD44780_RS_Pin|HD44780_E_Pin, GPIO_PIN_RESET);
+                          |BLUE_LED_Pin|GREEN_LED_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOA, HD44780_D4_Pin|HD44780_D5_Pin|HD44780_D6_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(AM2302_DATA_GPIO_Port, AM2302_DATA_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pins : HD44780_RS_Pin HD44780_E_Pin HD44780_D7_Pin */
+  GPIO_InitStruct.Pin = HD44780_RS_Pin|HD44780_E_Pin|HD44780_D7_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
   /*Configure GPIO pins : HD44780_D0_Pin HD44780_D1_Pin HD44780_D2_Pin HD44780_D3_Pin 
-                           HD44780_D4_Pin HD44780_D5_Pin HD44780_D6_Pin HD44780_D7_Pin 
-                           HD44780_RS_Pin HD44780_E_Pin */
+                           BLUE_LED_Pin GREEN_LED_Pin */
   GPIO_InitStruct.Pin = HD44780_D0_Pin|HD44780_D1_Pin|HD44780_D2_Pin|HD44780_D3_Pin 
-                          |HD44780_D4_Pin|HD44780_D5_Pin|HD44780_D6_Pin|HD44780_D7_Pin 
-                          |HD44780_RS_Pin|HD44780_E_Pin;
+                          |BLUE_LED_Pin|GREEN_LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -631,6 +642,13 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(B1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : HD44780_D4_Pin HD44780_D5_Pin HD44780_D6_Pin */
+  GPIO_InitStruct.Pin = HD44780_D4_Pin|HD44780_D5_Pin|HD44780_D6_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : AM2302_DATA_Pin */
   GPIO_InitStruct.Pin = AM2302_DATA_Pin;
