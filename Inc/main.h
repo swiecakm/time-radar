@@ -105,6 +105,8 @@ void ResetB1PushedTime(void);
 #define HD44780_D6_GPIO_Port GPIOA
 #define HD44780_D7_Pin GPIO_PIN_4
 #define HD44780_D7_GPIO_Port GPIOF
+#define AM2302_DATA_Pin GPIO_PIN_5
+#define AM2302_DATA_GPIO_Port GPIOA
 #define BLUE_LED_Pin GPIO_PIN_8
 #define BLUE_LED_GPIO_Port GPIOC
 #define GREEN_LED_Pin GPIO_PIN_9
@@ -113,8 +115,6 @@ void ResetB1PushedTime(void);
 #define SWDIO_GPIO_Port GPIOA
 #define SWCLK_Pin GPIO_PIN_14
 #define SWCLK_GPIO_Port GPIOA
-#define AM2302_DATA_Pin GPIO_PIN_3
-#define AM2302_DATA_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

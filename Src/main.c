@@ -616,10 +616,7 @@ static void MX_GPIO_Init(void)
                           |BLUE_LED_Pin|GREEN_LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, HD44780_D4_Pin|HD44780_D5_Pin|HD44780_D6_Pin, GPIO_PIN_RESET);
-
-  /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(AM2302_DATA_GPIO_Port, AM2302_DATA_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, HD44780_D4_Pin|HD44780_D5_Pin|HD44780_D6_Pin|AM2302_DATA_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : HD44780_RS_Pin HD44780_E_Pin HD44780_D7_Pin */
   GPIO_InitStruct.Pin = HD44780_RS_Pin|HD44780_E_Pin|HD44780_D7_Pin;
