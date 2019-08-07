@@ -77,8 +77,8 @@ void Error_Handler(void);
 /* USER CODE BEGIN EFP */
 void SetButtonPushed(void);
 void SetButtonNotPushed(void);
-void IncrementB1PushedTime(void);
-void ResetB1PushedTime(void);
+void IncrementB2PushedTime(void);
+void ResetB2PushedTime(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -113,6 +113,12 @@ void ResetB1PushedTime(void);
 #define GREEN_LED_GPIO_Port GPIOC
 #define SWDIO_Pin GPIO_PIN_13
 #define SWDIO_GPIO_Port GPIOA
+#define B3_Pin GPIO_PIN_6
+#define B3_GPIO_Port GPIOF
+#define B3_EXTI_IRQn EXTI4_15_IRQn
+#define B2_Pin GPIO_PIN_7
+#define B2_GPIO_Port GPIOF
+#define B2_EXTI_IRQn EXTI4_15_IRQn
 #define SWCLK_Pin GPIO_PIN_14
 #define SWCLK_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */

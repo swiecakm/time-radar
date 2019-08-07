@@ -91,9 +91,9 @@ unsigned char versionMessage[] = "Clock v1.0";
 
 RTC_DateTime_t *dateTime;
 
-int B1_pushed = 0;
-int B1_PushedTime = 0;
-int B1_LastPushedTime = 0;
+int B2_pushed = 0;
+int B2_PushedTime = 0;
+int B2_LastPushedTime = 0;
 
 uint8_t UART_received= 0;
 
@@ -219,27 +219,27 @@ void IncrementDateTime(enum SetTimePositions position)
 
 void SetButtonPushed(void)
 {
-	B1_pushed = 1;
+	B2_pushed = 1;
 }
 
 void SetButtonNotPushed(void)
 {
-	B1_pushed = 0;
+	B2_pushed = 0;
 }
 
 void IncrementB1PushedTime(void)
 {
-	B1_PushedTime ++;
+	B2_PushedTime ++;
 }
 
-void ResetB1PushedTime(void)
+void ResetB2PushedTime(void)
 {
 	//longer than 100 ms
-	if (B1_PushedTime > 1)
+	if (B2_PushedTime > 1)
 	{
-		B1_LastPushedTime = B1_PushedTime;
+		B2_LastPushedTime = B2_PushedTime;
 	}
-	B1_PushedTime = 0;
+	B2_PushedTime = 0;
 }
 
 
@@ -314,12 +314,12 @@ int main(void)
 		RTC_RefreshDateTime(&hi2c1, dateTime);
 		int arrowPosition = -1;
 		
-		if (dateTime->Minutes != prevMinutes || B1_pushed || B1_LastPushedTime > 0)
+		if (dateTime->Minutes != prevMinutes || B2_pushed || B2_LastPushedTime > 0)
 		{
 			AM2302_SendRequest();
 			
 			//If button hold for over 2s
-			if (B1_pushed && B1_PushedTime > 20)
+			if (B2_pushed && B2_PushedTime > 20)
 			{
 				IncrementDateTime(currentPosition);
 				RTC_RefreshDateTime(&hi2c1, dateTime);
@@ -331,7 +331,7 @@ int main(void)
 			HAL_Delay(100);
 			HD44780_GoToSecondLine();
 			//0.1s - 1s
-			if(B1_LastPushedTime > 1 && B1_LastPushedTime < 10)
+			if(B2_LastPushedTime > 1 && B2_LastPushedTime < 10)
 			{
 				if(currentPosition == NONE)
 				{
@@ -359,9 +359,9 @@ int main(void)
 			{
 				UpdateTemperatureMessage(secondLineMessage);
 			}
-			if(B1_LastPushedTime > 0)
+			if(B2_LastPushedTime > 0)
 			{
-				B1_LastPushedTime = 0;
+				B2_LastPushedTime = 0;
 			}
 			
 			HD44780_SendMessage(secondLineMessage);
@@ -654,9 +654,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(AM2302_DATA_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : B3_Pin B2_Pin */
+  GPIO_InitStruct.Pin = B3_Pin|B2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI0_1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
+
+  HAL_NVIC_SetPriority(EXTI4_15_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 
 }
 
