@@ -129,7 +129,7 @@ void HD44780_SetDataOnLCDPinsIfAvailable()
 
 void HD44780_WriteDataToLCD()
 {
-	HAL_GPIO_WritePin(GPIOC, HD44780_E_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(HD44780_E_GPIO_Port, HD44780_E_Pin, GPIO_PIN_RESET);
 }
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)

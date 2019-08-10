@@ -208,7 +208,7 @@ void TIM14_IRQHandler(void)
 	if (HAL_GPIO_ReadPin(B2_GPIO_Port, B2_Pin))
 	{
 		SetButtonPushed();	
-		IncrementB1PushedTime();		
+		IncrementB2PushedTime();		
 	}
 	else
 	{

@@ -82,10 +82,6 @@ void ResetB2PushedTime(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define HD44780_RS_Pin GPIO_PIN_0
-#define HD44780_RS_GPIO_Port GPIOF
-#define HD44780_E_Pin GPIO_PIN_1
-#define HD44780_E_GPIO_Port GPIOF
 #define HD44780_D0_Pin GPIO_PIN_0
 #define HD44780_D0_GPIO_Port GPIOC
 #define HD44780_D1_Pin GPIO_PIN_1
@@ -105,6 +101,10 @@ void ResetB2PushedTime(void);
 #define HD44780_D6_GPIO_Port GPIOA
 #define HD44780_D7_Pin GPIO_PIN_4
 #define HD44780_D7_GPIO_Port GPIOF
+#define HD44780_RS_Pin GPIO_PIN_5
+#define HD44780_RS_GPIO_Port GPIOF
+#define HD44780_E_Pin GPIO_PIN_4
+#define HD44780_E_GPIO_Port GPIOA
 #define AM2302_DATA_Pin GPIO_PIN_5
 #define AM2302_DATA_GPIO_Port GPIOA
 #define BLUE_LED_Pin GPIO_PIN_8
