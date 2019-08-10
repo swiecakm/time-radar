@@ -14,9 +14,9 @@ void AM2302_SendRequest()
  	}
 	AM2302_RequestSent = 1;
 	//mimimal star signal length is 1ms
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(AM2302_DATA_GPIO_Port, AM2302_DATA_Pin, GPIO_PIN_RESET);
 	HAL_Delay(1);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(AM2302_DATA_GPIO_Port, AM2302_DATA_Pin, GPIO_PIN_SET);
 }
 
 
